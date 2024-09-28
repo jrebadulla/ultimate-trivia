@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import './LoginPage.css'
-import { UserOutlined } from "@ant-design/icons";
-import { Input, Button, message } from "antd";
+import "./LoginPage.css";
+import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 import Logo from "../Image/trivia-logo.png";
-import { auth } from "../../Connection/firebaseConfig.js";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../Connection/firebaseConfig";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "../../Connection/firebaseConfig";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const LoginPage = () => {
   const [isActive, setIsActive] = useState(false);
@@ -56,19 +61,53 @@ const LoginPage = () => {
     setIsActive(false);
   };
 
+  const uploadProfilePicture = async (file, userId) => {
+    if (!file || !userId) {
+      console.error("File or User ID is undefined.");
+      return;
+    }
+    const storage = getStorage();
+    const storageRef = ref(storage, `profile_pictures/${userId}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
   const handleSignUp = async (e) => {
     e.preventDefault();
-    const { email, password } = formData;
+    const {
+      email,
+      password,
+      firstname,
+      lastname,
+      username,
+      level_id,
+      profile_picture,
+    } = formData;
 
     try {
-      // Firebase signup with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
-      message.success("Sign up successful!");
-      console.log(user);
 
-      // Navigate to dashboard or another page after successful sign up
-      navigate("/dashboard");
+      let profilePicUrl = "";
+      if (profile_picture) {
+        profilePicUrl = await uploadProfilePicture(profile_picture, user.uid);
+      }
+
+      await setDoc(doc(db, "users", user.uid), {
+        firstname,
+        lastname,
+        username,
+        level_id,
+        email,
+        profile_picture_url: profilePicUrl,
+        createdAt: new Date(),
+      });
+
+      message.success("Sign up successful!");
     } catch (error) {
       console.error(error);
       message.error("Error during signup: " + error.message);
@@ -78,22 +117,35 @@ const LoginPage = () => {
   const handleSignIn = async (e) => {
     e.preventDefault();
     try {
-      // Firebase login with email and password
-      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        username,
+        password
+      );
       const user = userCredential.user;
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          user_id: user.uid,
-          email: user.email,
-        })
-      );
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
 
-      // Navigate to dashboard after successful login
-      navigate("/dashboard");
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+
+        localStorage.setItem("firstname", userData.firstname);
+        localStorage.setItem("lastname", userData.lastname);
+
+        if (userData.profile_picture_url) {
+          localStorage.setItem("profile_picture", userData.profile_picture_url);
+        } else {
+          localStorage.removeItem("profile_picture");
+        }
+        navigate("/dashboard");
+      } else {
+        message.error("No additional user details found.");
+      }
     } catch (error) {
-      message.error("Login failed. Please check your credentials and try again.");
+      message.error(
+        "Login failed. Please check your credentials and try again."
+      );
       console.error(error.message);
     }
   };
@@ -108,15 +160,15 @@ const LoginPage = () => {
               <a href="#" className="icon"></a>
             </div>
             <input
-              type="firstname"
-              placeholder="Name"
+              type="text"
+              placeholder="First Name"
               name="firstname"
               value={formData.firstname}
               onChange={handleChange}
               required
             />
             <input
-              type="lastname"
+              type="text"
               placeholder="Last Name"
               name="lastname"
               value={formData.lastname}
@@ -124,7 +176,7 @@ const LoginPage = () => {
               required
             />
             <input
-              type="username"
+              type="text"
               placeholder="Username"
               name="username"
               value={formData.username}
@@ -170,7 +222,11 @@ const LoginPage = () => {
               onChange={handleFileChange}
             />
             {imagePreview && (
-              <img src={imagePreview} alt="Preview" className="upload-preview" />
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="upload-preview"
+              />
             )}
             <button onClick={handleSignUp}>Sign Up</button>
           </form>
@@ -203,7 +259,7 @@ const LoginPage = () => {
         <div className="toggle-container">
           <div className="toggle">
             <div className="toggle-panel toggle-left">
-              <img src={Logo} />
+              <img src={Logo} alt="logo" />
               <h1>Welcome Back!</h1>
               <p>Enter your personal details to use all the site features </p>
               <button className="hidden" id="login" onClick={handleClick}>
@@ -211,9 +267,11 @@ const LoginPage = () => {
               </button>
             </div>
             <div className="toggle-panel toggle-right">
-              <img src={Logo} />
+              <img src={Logo} alt="logo" />
               <h1>Welcome, To Ultimate Trivia!</h1>
-              <p>Register with your personal details to use all the site features </p>
+              <p>
+                Register with your personal details to use all the site features{" "}
+              </p>
               <button
                 className="hidden"
                 id="register"
