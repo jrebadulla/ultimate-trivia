@@ -1,22 +1,25 @@
+
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCI4VFOAOcbtMUHeEDPydLEyUgfzN3NsUE",
-    authDomain: "ultimate-trivia-f7884.firebaseapp.com",
-    projectId: "ultimate-trivia-f7884",
-    storageBucket: "ultimate-trivia-f7884.appspot.com",
-    messagingSenderId: "607715781953",
-    appId: "1:607715781953:web:47c1342ab5617f46b7c5c0",
+  apiKey: "AIzaSyCJwAgYzgyx0k4prY6at5Kb00LP9oJNTDg",
+  authDomain: "ultimate-trivia-946bc.firebaseapp.com",
+  projectId: "ultimate-trivia-946bc",
+  storageBucket: "ultimate-trivia-946bc.appspot.com",
+  messagingSenderId: "897482643976",
+  appId: "1:897482643976:web:71b917f3a131b5a7de0fbd",
+  measurementId: "G-V69LDL3QVP",
 };
 
 const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+export const auth = getAuth(app);
+
 const analytics = getAnalytics(app);
 
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-export { auth, db, storage };
+export { db, analytics };
