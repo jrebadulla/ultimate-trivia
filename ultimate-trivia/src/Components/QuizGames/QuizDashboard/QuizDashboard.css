@@ -1,0 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+.quiz-container {
+  width: 100%;
+  height: 88vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: linear-gradient(135deg, #0f1a36, #1c2b47);
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.quizes-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 600px;
+  width: 100%;
+  z-index: 10;
+}
+
+.quizes-container div {
+  background: linear-gradient(145deg, #1c2b47, #2e3e5c);
+  padding: 20px;
+  border-radius: 15px;
+  font-size: 1.5rem;
+  font-family: "Press Start 2P", cursive;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease,
+    filter 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid transparent;
+}
+
+.quizes-container div:before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3),
+    transparent 70%
+  );
+  transform: rotate(45deg);
+  pointer-events: none;
+  transition: transform 0.5s ease;
+}
+
+.quizes-container div:hover:before {
+  transform: rotate(-45deg);
+}
+
+.quizes-container div:hover {
+  transform: scale(1.08) rotate(2deg);
+  background: linear-gradient(145deg, #2e3e5c, #3e506d);
+  filter: drop-shadow(0 0 10px #ffdd57);
+  border-color: #ffdd57;
+  box-shadow: 0 12px 24px rgba(255, 109, 109, 0.7);
+}
+
+.quiz-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 90vh;
+  background: linear-gradient(135deg, #1c2b47, #3b4d71);
+  color: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+  border: 5px solid #ffdd57;
+  animation: modalShow 0.5s ease-out forwards;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+@keyframes modalShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.modal-header {
+  font-size: 2rem;
+  text-align: center;
+  color: #ffdd57;
+  text-shadow: 2px 2px #ff6b6b;
+}
+
+.modal-debug {
+  font-size: 1.2rem;
+  text-align: center;
+  font-family: "Press Start 2P", cursive;
+  background-color: transparent;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background-color: #ff6b6b;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 5px 10px;
+  transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #e63946;
+}
+
+@keyframes particleMove {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-200px) rotate(360deg);
+  }
+}
