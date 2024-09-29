@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 import Logo from "../Image/trivia-logo.png";
 import Tutorials from "../Tutotial/Tutorial";
+import QuizDashboard from "../QuizGames/QuizDashboard/QuizDashboard";
 
 const DashboardLayout = () => {
   const [firstname, setFirstname] = useState("");
@@ -21,7 +22,9 @@ const DashboardLayout = () => {
     setActiveComponent("tutorial");
   };
 
-
+  const handleQuizClick = () => {
+    setActiveComponent("quiz");
+  };
 
   return (
     <div className="dashboard-container">
@@ -31,7 +34,7 @@ const DashboardLayout = () => {
         <div className="links">
           <a>Trivia</a>
           <a href="#!" onClick={handleTutorialClick}>Tutorials</a>
-          <a href="#!">Quiz Game</a>
+          <a href="#!" onClick={handleQuizClick}>Quiz Game</a>
           <a href="#!">Compiler</a>
           <a href="#!">Statistics</a>
         </div>
@@ -57,6 +60,7 @@ const DashboardLayout = () => {
       </div>
       <div className="content">
       {activeComponent === "tutorial" && <Tutorials />}
+      {activeComponent === "quiz" && <QuizDashboard />}
       </div>
     </div>
   );

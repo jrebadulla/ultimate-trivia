@@ -83,21 +83,34 @@ const LoginPage = () => {
       level_id,
       profile_picture,
     } = formData;
-
+  
     try {
+      const userIdDocRef = doc(db, "counters", "user_id_counter");
+      const userIdDoc = await getDoc(userIdDocRef);
+  
+      let newUserId = 1; 
+  
+      if (userIdDoc.exists()) {
+        newUserId = userIdDoc.data().currentId + 1; 
+        await setDoc(userIdDocRef, { currentId: newUserId }); 
+      } else {
+        await setDoc(userIdDocRef, { currentId: newUserId });
+      }
+  
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
       const user = userCredential.user;
-
+  
       let profilePicUrl = "";
       if (profile_picture) {
         profilePicUrl = await uploadProfilePicture(profile_picture, user.uid);
       }
-
+  
       await setDoc(doc(db, "users", user.uid), {
+        user_id: newUserId, 
         firstname,
         lastname,
         username,
@@ -106,7 +119,7 @@ const LoginPage = () => {
         profile_picture_url: profilePicUrl,
         createdAt: new Date(),
       });
-
+  
       message.success("Sign up successful!");
     } catch (error) {
       console.error(error);
@@ -132,6 +145,7 @@ const LoginPage = () => {
 
         localStorage.setItem("firstname", userData.firstname);
         localStorage.setItem("lastname", userData.lastname);
+        localStorage.setItem("user_id", userData.user_id);
 
         if (userData.profile_picture_url) {
           localStorage.setItem("profile_picture", userData.profile_picture_url);
