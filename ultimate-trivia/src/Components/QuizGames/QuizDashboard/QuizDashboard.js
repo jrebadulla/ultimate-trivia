@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./QuizDashboard.css";
 import BubblePopQuiz from "../BubblePop/BubblePop";
 import MultipleChoice from "../MultipleChoice/MultipleChoice";
+import FillInTheBlank from "../FillInTheBlank/FillInTheBlank";
 
 const QuizDashboard = () => {
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -44,6 +45,8 @@ const QuizDashboard = () => {
               <BubblePopQuiz />
             ) : activeQuiz === "Multiple Choice" ? (
               <MultipleChoice />
+            ) : activeQuiz === "Fill in the Blanks" ? (
+              <FillInTheBlank />
             ) : (
               <p>This is where you play the {activeQuiz} quiz!</p>
             )}
