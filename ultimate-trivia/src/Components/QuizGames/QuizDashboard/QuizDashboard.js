@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./QuizDashboard.css";
 import BubblePopQuiz from "../BubblePop/BubblePop";
+import MultipleChoice from "../MultipleChoice/MultipleChoice";
 
 const QuizDashboard = () => {
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -41,6 +42,8 @@ const QuizDashboard = () => {
           <div className="modal-debug">
             {activeQuiz === "Bubble Pop Quiz" ? (
               <BubblePopQuiz />
+            ) : activeQuiz === "Multiple Choice" ? (
+              <MultipleChoice />
             ) : (
               <p>This is where you play the {activeQuiz} quiz!</p>
             )}
