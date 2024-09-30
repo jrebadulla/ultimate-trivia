@@ -76,8 +76,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
-  height: 70vh;
+  max-width: 100%; 
+  max-height: 100vh; 
   background: linear-gradient(135deg, #1c2b47, #3b4d71);
   color: #ffffff;
   border-radius: 15px;
@@ -85,11 +85,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; 
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
   border: 5px solid #ffdd57;
   animation: modalShow 0.5s ease-out forwards;
-  overflow: hidden;
   z-index: 1000;
 }
 
