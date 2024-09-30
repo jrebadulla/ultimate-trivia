@@ -8,7 +8,6 @@ const MultipleChoice = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
   const [totalCorrectAnswers, setTotalCorrectAnswers] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(100); 
   const [timer, setTimer] = useState(0); 
   const gameId = 2;
 
@@ -101,7 +100,6 @@ const MultipleChoice = () => {
     setCurrentQuestionIndex(0);
     setTotalCorrectAnswers(0);
     setQuizFinished(false);
-    setTimeLeft(100);
     setTimer(0); 
   };
 
