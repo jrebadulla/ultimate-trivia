@@ -8,14 +8,17 @@ const MultipleChoice = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
   const [totalCorrectAnswers, setTotalCorrectAnswers] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(100); // This will be your countdown time
-  const [timer, setTimer] = useState(0); // Time taken by the user
+  const [timeLeft, setTimeLeft] = useState(100); 
+  const [timer, setTimer] = useState(0); 
   const gameId = 2;
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const q = query(collection(db, "questions"), where("game_id", "==", gameId));
+        const q = query(
+          collection(db, "questions"),
+          where("game_id", "==", gameId)
+        );
         const querySnapshot = await getDocs(q);
         const loadedQuestions = querySnapshot.docs.map((doc) => {
           const data = doc.data();
@@ -41,12 +44,12 @@ const MultipleChoice = () => {
   useEffect(() => {
     let interval;
     if (!quizFinished) {
-      // Start the timer when the quiz is active
+
       interval = setInterval(() => {
         setTimer((prevTime) => prevTime + 1);
       }, 1000);
     }
-    return () => clearInterval(interval); // Cleanup interval on unmount or when quiz finishes
+    return () => clearInterval(interval); 
   }, [quizFinished]);
 
   const handleAnswer = (answer) => {
@@ -71,7 +74,7 @@ const MultipleChoice = () => {
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
-    const timeTaken = timer; // Use the timer value here
+    const timeTaken = timer; 
     const difficultyLevel = "medium";
     const dateTime = new Date();
 
@@ -99,7 +102,7 @@ const MultipleChoice = () => {
     setTotalCorrectAnswers(0);
     setQuizFinished(false);
     setTimeLeft(100);
-    setTimer(0); // Reset the timer
+    setTimer(0); 
   };
 
   if (questions.length === 0) {
@@ -117,7 +120,7 @@ const MultipleChoice = () => {
             <h3>
               Total Score: {totalCorrectAnswers} / {questions.length}
             </h3>
-            <h3>Time Taken: {timer} seconds</h3> {/* Display time taken */}
+            <h3>Time Taken: {timer} seconds</h3> 
           </div>
           <button className="play-again-button" onClick={handlePlayAgain}>
             Play Again
