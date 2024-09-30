@@ -118,18 +118,6 @@ const TypingGame = () => {
     const difficultyLevel = "medium";
     const dateTime = new Date();
 
-    console.log("Saving score with details:", {
-      userId,
-      quizId,
-      score: correctAnswers,
-      totalQuestions,
-      correctAnswers,
-      incorrectAnswers,
-      dateTime,
-      timeTaken: finalTimeTaken,
-      difficultyLevel,
-    });
-
     try {
       await addDoc(collection(db, "userScores"), {
         userId,

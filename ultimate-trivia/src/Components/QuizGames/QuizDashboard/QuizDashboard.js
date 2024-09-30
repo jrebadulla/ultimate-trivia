@@ -4,6 +4,7 @@ import BubblePopQuiz from "../BubblePop/BubblePop";
 import MultipleChoice from "../MultipleChoice/MultipleChoice";
 import FillInTheBlank from "../FillInTheBlank/FillInTheBlank";
 import TypingGame from "../TypingGame/TypingGame";
+import FourPicsOneWord from "../FourPicOneWord/FourPicOneWord";
 
 const QuizDashboard = () => {
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -32,7 +33,6 @@ const QuizDashboard = () => {
           Four Pics One Word
         </div>
         <div onClick={() => handleQuizClick("Typing Game")}>Typing Game</div>
-        <div onClick={() => handleQuizClick("Code Combat")}>Code Combat</div>
       </div>
 
       {activeQuiz && (
@@ -50,6 +50,8 @@ const QuizDashboard = () => {
               <FillInTheBlank />
             ) : activeQuiz === "Typing Game" ? (
               <TypingGame />
+            ) : activeQuiz === "Four Pics One Word" ? (
+              <FourPicsOneWord />
             ) : (
               <p>This is where you play the {activeQuiz} quiz!</p>
             )}
