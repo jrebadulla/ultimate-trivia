@@ -3,7 +3,7 @@ import "./BubblePop.css";
 import { v4 as uuidv4 } from "uuid";
 import useSound from "use-sound";
 import { db } from "../../../Connection/firebaseConfig";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
 
 const BubblePopQuiz = React.memo(() => {
   const [bubbles, setBubbles] = useState([]);
@@ -15,6 +15,7 @@ const BubblePopQuiz = React.memo(() => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [popBubbleId, setPopBubbleId] = useState(null);
+  const gameId = 1;
 
   const currentQuestion = useMemo(
     () => questions[currentQuestionIndex],
@@ -35,7 +36,11 @@ const BubblePopQuiz = React.memo(() => {
     const fetchQuestions = async () => {
       setLoading(true);
       try {
-        const querySnapshot = await getDocs(collection(db, "questions"));
+        const q = query(
+          collection(db, "questions"),
+          where("game_id", "==", gameId)
+        );
+        const querySnapshot = await getDocs(q);
         const loadedQuestions = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -50,7 +55,6 @@ const BubblePopQuiz = React.memo(() => {
           };
         });
         setQuestions(loadedQuestions);
-        console.log(loadedQuestions);
       } catch (error) {
         setError("Failed to fetch questions");
       } finally {
@@ -105,29 +109,29 @@ const BubblePopQuiz = React.memo(() => {
 
   const handleBubbleClick = (id, answer) => {
     if (gameOver) return;
-  
+
     setPopBubbleId(id);
     playPopSound();
-  
+
     setTimeout(() => {
       const isCorrect = answer === currentQuestion.correct_answer;
-  
+
       if (isCorrect) {
         setScore((prevScore) => {
           const newScore = prevScore + 1;
           playCorrectSound();
-          return newScore; 
+          return newScore;
         });
       } else {
         playWrongSound();
       }
-  
+
       setBubbles((prevBubbles) =>
         prevBubbles.filter((bubble) => bubble.id !== id)
       );
-  
+
       const nextQuestionIndex = currentQuestionIndex + 1;
-  
+
       if (nextQuestionIndex >= questions.length) {
         setGameOver(true);
         playGameOverSound();
@@ -137,11 +141,12 @@ const BubblePopQuiz = React.memo(() => {
       }
     }, 500);
   };
+
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
     const quizId = currentQuestion?.game_id;
     const totalQuestions = questions.length;
-    const correctAnswers = score; 
+    const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
     const timeTaken = 100 - timeLeft;
     const difficultyLevel = "medium";
@@ -151,7 +156,7 @@ const BubblePopQuiz = React.memo(() => {
       await addDoc(collection(db, "userScores"), {
         userId,
         quizId,
-        score: correctAnswers, 
+        score: correctAnswers,
         totalQuestions,
         correctAnswers,
         incorrectAnswers,
@@ -159,8 +164,6 @@ const BubblePopQuiz = React.memo(() => {
         timeTaken,
         difficultyLevel,
       });
-      console.log("Score saved successfully");
-      console.log(score); 
     } catch (error) {
       console.error("Error saving score:", error);
     }
@@ -180,11 +183,11 @@ const BubblePopQuiz = React.memo(() => {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="quiz-modal">
+    <div>
       {!gameOver ? (
-        <div className="bubble-quiz-container">
-          <div className="bubble-quiz-header">
-            <p className="modal-header">Level {currentQuestionIndex + 1}</p>
+        <div>
+          <div>
+            <p className="level">Level {currentQuestionIndex + 1}</p>
             <p className="timer">Time Left: {timeLeft}s</p>
             <p className="current-question">{currentQuestion?.question_text}</p>
           </div>
