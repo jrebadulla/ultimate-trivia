@@ -146,6 +146,7 @@ const LoginPage = () => {
         localStorage.setItem("firstname", userData.firstname);
         localStorage.setItem("lastname", userData.lastname);
         localStorage.setItem("user_id", userData.user_id);
+        localStorage.setItem("role", userData.role);
 
         if (userData.profile_picture_url) {
           localStorage.setItem("profile_picture", userData.profile_picture_url);
