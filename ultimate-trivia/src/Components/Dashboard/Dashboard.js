@@ -4,6 +4,7 @@ import Logo from "../Image/trivia-logo.png";
 import Tutorials from "../Tutotial/Tutorial";
 import QuizDashboard from "../QuizGames/QuizDashboard/QuizDashboard";
 import { useNavigate } from "react-router-dom";
+import Compiler from "../Compiler/Compiler";
 
 const DashboardLayout = () => {
   const [firstname, setFirstname] = useState("");
@@ -30,6 +31,10 @@ const DashboardLayout = () => {
     setActiveComponent("quiz");
   };
 
+  const handleCompilerClick = () => {
+    setActiveComponent("compiler");
+  };
+
   const handleSignInOut = () => {
     navigate("/signOut");
   };
@@ -43,7 +48,7 @@ const DashboardLayout = () => {
           <a>Trivia</a>
           <a href="#!" onClick={handleTutorialClick}>Tutorials</a>
           <a href="#!" onClick={handleQuizClick}>Quiz Game</a>
-          <a href="#!">Compiler</a>
+          <a href="#!" onClick={handleCompilerClick}>Compiler</a>
           <a href="#!">Statistics</a>
         </div>
         <div 
@@ -104,6 +109,7 @@ const DashboardLayout = () => {
       <div className="content">
         {activeComponent === "tutorial" && <Tutorials />}
         {activeComponent === "quiz" && <QuizDashboard />}
+        {activeComponent === "compiler" && <Compiler />}
       </div>
     </div>
   );
