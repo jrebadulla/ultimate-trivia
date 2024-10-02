@@ -6,6 +6,7 @@ import QuizDashboard from "../QuizGames/QuizDashboard/QuizDashboard";
 import { useNavigate } from "react-router-dom";
 import Compiler from "../Compiler/Compiler";
 import Trivia from "../Trivia/Trivia";
+import Manage from "../AdminManagement/AdminManagement";
 
 const DashboardLayout = () => {
   const [firstname, setFirstname] = useState("");
@@ -14,6 +15,7 @@ const DashboardLayout = () => {
   const [activeComponent, setActiveComponent] = useState("trivia");
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [userRole, setUserRole] = useState("");
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -22,6 +24,8 @@ const DashboardLayout = () => {
     setProfilePicture(
       localStorage.getItem("profile_picture") || "/path/to/default-image.jpg"
     );
+    setUserRole(localStorage.getItem("role") || "user"); 
+    console.log(userRole);
   }, []);
 
   const handleTutorialClick = () => {
@@ -36,9 +40,12 @@ const DashboardLayout = () => {
     setActiveComponent("compiler");
   };
 
-  
   const handleTriviaClick = () => {
     setActiveComponent("trivia");
+  };
+
+  const handleManageClick = () => {
+    setActiveComponent("manage");
   };
 
   const handleSignInOut = () => {
@@ -51,6 +58,9 @@ const DashboardLayout = () => {
         <img src={Logo} alt="Ultimate Trivia Logo" />
         <h3>Ultimate Trivia</h3>
         <div className="links">
+          {userRole === "admin" && ( // Conditionally render the Manage link
+            <a href="#!" onClick={handleManageClick}>Manage</a>
+          )}
           <a onClick={handleTriviaClick}>Trivia</a>
           <a href="#!" onClick={handleTutorialClick}>Tutorials</a>
           <a href="#!" onClick={handleQuizClick}>Quiz Game</a>
@@ -117,6 +127,7 @@ const DashboardLayout = () => {
         {activeComponent === "quiz" && <QuizDashboard />}
         {activeComponent === "compiler" && <Compiler />}
         {activeComponent === "trivia" && <Trivia />}
+        {activeComponent === "manage" && <Manage userRole={userRole} />}
       </div>
     </div>
   );
