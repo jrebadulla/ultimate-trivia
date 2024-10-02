@@ -1,0 +1,216 @@
+.manage-admin-management-dashboard {
+  display: flex;
+  height: 88vh;
+  font-family: Arial, sans-serif;
+}
+
+.manage-sidebar {
+  background-color: #091c31;
+  width: 20%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.manage-add-trivia {
+  background: transparent;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  border: 2px solid rgba(161, 226, 252, 0.8);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 200px;
+}
+
+.manage-add-trivia:hover {
+  background: linear-gradient(135deg, #0d47a1, #06317d);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+}
+
+.manage-add-trivia:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+.manage-main-content {
+  width: 80%;
+  background-color: #f7f9fc;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.manage-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 20px;
+}
+
+.manage-trivia-items {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.manage-trivia-item {
+  margin: 10px;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  width: 30%;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.manage-trivia-item:hover {
+  transform: translateY(-5px);
+}
+
+.manage-trivia-item img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+.manage-trivia-info h4 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.manage-trivia-info p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* Modal Styles */
+.manage-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  z-index: 1000;
+}
+
+.manage-modal img {
+  max-width: 100%;
+  max-height: 200px; 
+  object-fit: contain;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.manage-modal form {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 15px;
+}
+
+.manage-modal label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.manage-modal input[type="text"],
+.manage-modal textarea,
+.manage-modal input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.manage-modal textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.manage-modal .form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.manage-modal .form-actions button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.manage-modal .form-actions .submit-btn {
+  background-color: #2b85d3;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.manage-modal .form-actions .submit-btn:hover {
+  background-color: #1d6fbb;
+}
+
+.manage-modal .form-actions .cancel-btn {
+  background-color: #ff6b6b;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.manage-modal .form-actions .cancel-btn:hover {
+  background-color: #ff4b4b;
+}
+
+.manage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.manage-trivia-info button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #2b85d3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.manage-trivia-info button:hover {
+  background-color: #1d6fbb;
+}
+
+.manage-trivia-info .delete{
+  margin-left: 2px;
+}
