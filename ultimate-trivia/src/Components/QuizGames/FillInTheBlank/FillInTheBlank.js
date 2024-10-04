@@ -12,6 +12,8 @@ const FillInTheBlank = () => {
   const [endTime, setEndTime] = useState(null);
   const [currentDay, setCurrentDay] = useState("");
   const [currentAnswer, setCurrentAnswer] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const gameId = 3;
 
   useEffect(() => {
@@ -20,16 +22,38 @@ const FillInTheBlank = () => {
     setCurrentDay(today);
 
     const fetchQuestions = async () => {
-      const q = query(
-        collection(db, "questions"),
-        where("game_id", "==", gameId)
-      );
-      const questionsSnapshot = await getDocs(q);
-      const questionsList = questionsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setQuestions(questionsList);
+      setLoading(true);
+      const levelId = localStorage.getItem("level_id");
+
+      if (!levelId) {
+        setError("Level not found.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const q = query(
+          collection(db, "questions"),
+          where("game_id", "==", gameId),
+          where("level_id", "==", parseInt(levelId))
+        );
+        const questionsSnapshot = await getDocs(q);
+        const questionsList = questionsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        if (questionsList.length === 0) {
+          setError("No questions available for this level.");
+        } else {
+          setQuestions(questionsList);
+        }
+      } catch (fetchError) {
+        setError("Failed to fetch questions.");
+        console.error(fetchError);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchQuestions();
@@ -58,7 +82,6 @@ const FillInTheBlank = () => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
-    const quizId = questions[currentQuestionIndex]?.game_id;
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
@@ -69,7 +92,7 @@ const FillInTheBlank = () => {
     try {
       await addDoc(collection(db, "userScores"), {
         userId,
-        quizId: gameId,
+        game_id: gameId,
         score: correctAnswers,
         totalQuestions,
         correctAnswers,
@@ -79,7 +102,6 @@ const FillInTheBlank = () => {
         difficultyLevel,
       });
       console.log("Score saved successfully");
-      console.log(score);
     } catch (error) {
       console.error("Error saving score:", error);
     }
@@ -107,8 +129,12 @@ const FillInTheBlank = () => {
     setEndTime(null);
   };
 
-  if (questions.length === 0) {
+  if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -138,7 +164,11 @@ const FillInTheBlank = () => {
             onChange={(e) => setCurrentAnswer(e.target.value)}
             placeholder="Type your answer here..."
           />
-          <button className="submit-button" onClick={handleAnswer}>
+          <button
+            className="submit-button"
+            onClick={handleAnswer}
+            disabled={!currentAnswer.trim()}
+          >
             Submit
           </button>
         </div>
