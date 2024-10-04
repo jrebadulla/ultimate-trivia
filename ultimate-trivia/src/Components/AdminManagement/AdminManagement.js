@@ -38,6 +38,7 @@ const Manage = () => {
     question_id: "",
     game_id: "",
     question_text: "",
+    level_id: "",
     option_a: "",
     option_b: "",
     option_c: "",
@@ -299,6 +300,7 @@ const Manage = () => {
         ...questionData,
         game_id: Number(questionData.game_id),
         question_id: Number(questionData.question_id),
+        level_id: Number(questionData.level_id),
         ...uploadedImageURLs,
       };
 
@@ -326,6 +328,7 @@ const Manage = () => {
         question_id: "",
         game_id: "",
         question_text: "",
+        level_id: "",
         option_a: "",
         option_b: "",
         option_c: "",
@@ -348,6 +351,7 @@ const Manage = () => {
       question_id: question.id,
       game_id: question.game_id,
       question_text: question.question_text,
+      level_id: question.level_id,
       option_a: question.option_a,
       option_b: question.option_b,
       option_c: question.option_c,
@@ -591,7 +595,15 @@ const Manage = () => {
                   required
                   id="question_text"
                 />
-
+                <label htmlFor="level_id">Required Student Level:</label>
+                <input
+                  type="text"
+                  name="level_id"
+                  value={questionData.level_id}
+                  onChange={handleQuestionInputChange}
+                  required
+                  id="level_id"
+                />
                 <label htmlFor="option_a">Option A:</label>
                 <input
                   type="text"

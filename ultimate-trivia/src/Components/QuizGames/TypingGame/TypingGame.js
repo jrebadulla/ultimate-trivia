@@ -15,15 +15,24 @@ const TypingGame = () => {
   const [userScore, setUserScore] = useState(0);
   const [timer, setTimer] = useState(60);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-
-  const userId = localStorage.getItem("user_id");
+  const [gameStatus, setGameStatus] = useState("");
+  const [loading, setLoading] = useState(true);
   const gameId = 4;
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      const levelId = localStorage.getItem("level_id");
+
+      if (!levelId) {
+        setGameStatus("Level not found.");
+        setLoading(false);
+        return;
+      }
+
       const q = query(
         collection(db, "questions"),
-        where("game_id", "==", gameId)
+        where("game_id", "==", gameId),
+        where("level_id", "==", parseInt(levelId))
       );
       const questionsSnapshot = await getDocs(q);
       const questionsList = questionsSnapshot.docs.map((doc) => ({
@@ -32,11 +41,13 @@ const TypingGame = () => {
       }));
 
       setQuestions(questionsList);
+      setLoading(false);
       if (questionsList.length > 0) {
         const randomQuestion =
           questionsList[Math.floor(Math.random() * questionsList.length)];
         setSnippet(randomQuestion.question_text);
         setCurrentQuestion(randomQuestion);
+        setLoading(false);
       }
     };
 
@@ -80,11 +91,11 @@ const TypingGame = () => {
       setEndTime(endTimeValue);
       setTimeTaken(timeSpent);
 
-      const calculatedScore = Math.round(calculatedAccuracy); 
+      const calculatedScore = Math.round(calculatedAccuracy);
       setUserScore(calculatedScore);
 
       setGameFinished(true);
-      saveUserScore(calculatedScore, timeSpent); 
+      saveUserScore(calculatedScore, timeSpent);
       clearInterval();
     }
   };
@@ -111,7 +122,7 @@ const TypingGame = () => {
 
   const saveUserScore = async (calculatedScore, finalTimeTaken) => {
     const userId = localStorage.getItem("user_id");
-    const quizId = gameId;
+    const game_id = gameId;
     const totalQuestions = questions.length;
     const correctAnswers = calculatedScore;
     const incorrectAnswers = totalQuestions - correctAnswers;
@@ -121,7 +132,7 @@ const TypingGame = () => {
     try {
       await addDoc(collection(db, "userScores"), {
         userId,
-        quizId,
+        game_id,
         score: correctAnswers,
         totalQuestions,
         correctAnswers,
@@ -136,8 +147,12 @@ const TypingGame = () => {
     }
   };
 
-  if (questions.length === 0) {
+  if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (questions.length === 0) {
+    return <div>No questions available For Your Level.</div>;
   }
 
   return (

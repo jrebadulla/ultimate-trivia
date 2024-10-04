@@ -36,10 +36,20 @@ const BubblePopQuiz = React.memo(() => {
     const fetchQuestions = async () => {
       setLoading(true);
       try {
+        const levelId = localStorage.getItem("level_id");
+
+        if (!levelId) {
+          setError("Level not found.");
+          setLoading(false);
+          return;
+        }
+
         const q = query(
           collection(db, "questions"),
-          where("game_id", "==", gameId)
+          where("game_id", "==", gameId),
+          where("level_id", "==", parseInt(levelId))
         );
+
         const querySnapshot = await getDocs(q);
         const loadedQuestions = querySnapshot.docs.map((doc) => {
           const data = doc.data();
@@ -54,6 +64,7 @@ const BubblePopQuiz = React.memo(() => {
             ].filter((option) => option !== data.correct_answer),
           };
         });
+
         setQuestions(loadedQuestions);
       } catch (error) {
         setError("Failed to fetch questions");
@@ -144,7 +155,7 @@ const BubblePopQuiz = React.memo(() => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
-    const quizId = currentQuestion?.game_id;
+    const game_id = currentQuestion?.game_id;
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
@@ -155,7 +166,7 @@ const BubblePopQuiz = React.memo(() => {
     try {
       await addDoc(collection(db, "userScores"), {
         userId,
-        quizId,
+        game_id,
         score: correctAnswers,
         totalQuestions,
         correctAnswers,
@@ -179,8 +190,13 @@ const BubblePopQuiz = React.memo(() => {
     saveTimestampRef.current = null;
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (questions.length === 0) {
+    return <div>No questions available For Your Level.</div>;
+  }
 
   return (
     <div>

@@ -8,15 +8,25 @@ const MultipleChoice = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
   const [totalCorrectAnswers, setTotalCorrectAnswers] = useState(0);
-  const [timer, setTimer] = useState(0); 
+  const [timer, setTimer] = useState(0);
+  const [loading, setLoading] = useState(true);
   const gameId = 2;
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
+        const levelId = localStorage.getItem("level_id");
+
+        if (!levelId) {
+          console.log("Level not found.");
+          setLoading(false);
+          return;
+        }
+
         const q = query(
           collection(db, "questions"),
-          where("game_id", "==", gameId)
+          where("game_id", "==", gameId),
+          where("level_id", "==", parseInt(levelId))
         );
         const querySnapshot = await getDocs(q);
         const loadedQuestions = querySnapshot.docs.map((doc) => {
@@ -31,24 +41,26 @@ const MultipleChoice = () => {
             ],
           };
         });
+
         setQuestions(loadedQuestions);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching questions from Firebase:", error);
+        setLoading(false);
       }
     };
 
     fetchQuestions();
-  }, []);
+  }, [gameId]);
 
   useEffect(() => {
     let interval;
     if (!quizFinished) {
-
       interval = setInterval(() => {
         setTimer((prevTime) => prevTime + 1);
       }, 1000);
     }
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, [quizFinished]);
 
   const handleAnswer = (answer) => {
@@ -69,18 +81,18 @@ const MultipleChoice = () => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
-    const quizId = questions[currentQuestionIndex]?.game_id;
+    const game_id = gameId;
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
-    const timeTaken = timer; 
+    const timeTaken = timer;
     const difficultyLevel = "medium";
     const dateTime = new Date();
 
     try {
       await addDoc(collection(db, "userScores"), {
         userId,
-        quizId,
+        game_id,
         score: correctAnswers,
         totalQuestions,
         correctAnswers,
@@ -90,7 +102,6 @@ const MultipleChoice = () => {
         difficultyLevel,
       });
       console.log("Score saved successfully");
-      console.log(score);
     } catch (error) {
       console.error("Error saving score:", error);
     }
@@ -100,17 +111,21 @@ const MultipleChoice = () => {
     setCurrentQuestionIndex(0);
     setTotalCorrectAnswers(0);
     setQuizFinished(false);
-    setTimer(0); 
+    setTimer(0);
   };
 
-  if (questions.length === 0) {
+  if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (questions.length === 0) {
+    return <div>No questions available For Your Level.</div>;
   }
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <div className="modal-content">
+    <div>
       {quizFinished ? (
         <div className="results">
           <h2 className="modal-header">Game Over!</h2>
@@ -118,7 +133,7 @@ const MultipleChoice = () => {
             <h3>
               Total Score: {totalCorrectAnswers} / {questions.length}
             </h3>
-            <h3>Time Taken: {timer} seconds</h3> 
+            <h3>Time Taken: {timer} seconds</h3>
           </div>
           <button className="play-again-button" onClick={handlePlayAgain}>
             Play Again

@@ -13,16 +13,26 @@ const FourPicsOneWord = () => {
   const [showScore, setShowScore] = useState(false);
   const [score, setScore] = useState(0);
   const [gameFinished, setGameFinished] = useState(false);
-  const [startTime, setStartTime] = useState(null); 
+  const [startTime, setStartTime] = useState(null);
+  const [loading, setLoading] = useState(true); 
 
   const userId = localStorage.getItem("user_id");
   const gameId = 5;
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      const levelId = localStorage.getItem("level_id");
+
+      if (!levelId) {
+        setGameStatus("Level not found.");
+        setLoading(false);
+        return;
+      }
+
       const q = query(
         collection(db, "questions"),
-        where("game_id", "==", gameId)
+        where("game_id", "==", gameId),
+        where("level_id", "==", parseInt(levelId))
       );
       const questionsSnapshot = await getDocs(q);
       const questionsList = questionsSnapshot.docs.map((doc) => ({
@@ -34,6 +44,7 @@ const FourPicsOneWord = () => {
       if (questionsList.length > 0) {
         setCorrectAnswer(questionsList[0].correct_answer);
       }
+      setLoading(false); 
     };
 
     fetchQuestions();
@@ -46,7 +57,7 @@ const FourPicsOneWord = () => {
 
   const handleLetterChange = (index, value) => {
     const newAnswer = userAnswer.split("");
-    newAnswer[index] = value.slice(-1);
+    newAnswer[index] = value.slice(-1); 
     setUserAnswer(newAnswer.join(""));
   };
 
@@ -60,7 +71,7 @@ const FourPicsOneWord = () => {
       setGameStatus("Correct!");
       setInputClass("correct");
       const newScore = score + 1;
-      setScore(newScore); 
+      setScore(newScore);
       setShowScore(true);
 
       setTimeout(async () => {
@@ -74,7 +85,7 @@ const FourPicsOneWord = () => {
           setGameStatus("Game Over!");
           setInputClass("");
           setGameFinished(true);
-          await finishGame(newScore); 
+          await finishGame(newScore);
         }
       }, 1000);
     } else {
@@ -87,13 +98,13 @@ const FourPicsOneWord = () => {
   const finishGame = async (finalScore) => {
     const endTime = Date.now();
     const finalTimeTaken = (endTime - startTime) / 1000; 
-    await saveUserScore(finalScore, finalTimeTaken); 
+    await saveUserScore(finalScore, finalTimeTaken);
   };
 
   const saveUserScore = async (calculatedScore, finalTimeTaken) => {
-    const quizId = gameId;
+    const game_id = gameId;
     const totalQuestions = questions.length;
-    const correctAnswers = calculatedScore; 
+    const correctAnswers = calculatedScore;
     const incorrectAnswers = totalQuestions - correctAnswers;
     const difficultyLevel = "medium";
     const dateTime = new Date();
@@ -101,13 +112,13 @@ const FourPicsOneWord = () => {
     try {
       await addDoc(collection(db, "userScores"), {
         userId,
-        quizId,
+        game_id,
         score: correctAnswers,
         totalQuestions,
         correctAnswers,
         incorrectAnswers,
         dateTime,
-        timeTaken: finalTimeTaken, 
+        timeTaken: finalTimeTaken,
         difficultyLevel,
       });
       console.log("Score saved successfully");
@@ -116,14 +127,27 @@ const FourPicsOneWord = () => {
     }
   };
 
+  const handlePlayAgain = () => {
+    setCurrentQuestionIndex(0);
+    setUserAnswer("");
+    setScore(0);
+    setGameFinished(false);
+    setGameStatus("");
+    setStartTime(Date.now()); 
+  };
+
+  if (loading) {
+    return <div className="FourPic-question-container">Loading questions...</div>;
+  }
+
   if (questions.length === 0) {
-    return <div className="FourPic-question-container">Loading...</div>;
+    return <div className="FourPic-question-container">No questions available For Your Level.</div>;
   }
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <div>
+    <div className="FourPic-game-container">
       <div>
         <p className="level">Level {currentQuestionIndex + 1}</p>
       </div>
@@ -179,6 +203,14 @@ const FourPicsOneWord = () => {
         Submit
       </button>
       {showScore && <div className="FourPic-status-message">{gameStatus}</div>}
+      {gameFinished && (
+        <div className="FourPic-game-over">
+          <p>Game Over! Your score: {score}</p>
+          <button onClick={handlePlayAgain} className="FourPic-play-again-button">
+            Play Again
+          </button>
+        </div>
+      )}
     </div>
   );
 };
