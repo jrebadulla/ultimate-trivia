@@ -14,7 +14,7 @@
   justify-content: flex-start;
 }
 
-.manage-add-trivia {
+.manage-sidebar button {
   background: transparent;
   color: white;
   padding: 12px 24px;
@@ -29,15 +29,19 @@
   width: 200px;
 }
 
-.manage-add-trivia:hover {
+.manage-sidebar button:hover {
   background: linear-gradient(135deg, #0d47a1, #06317d);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   transform: translateY(-3px);
 }
 
-.manage-add-trivia:active {
+.manage-sidebar button:active {
   transform: translateY(1px);
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+.manage-sidebar .add-question {
+  margin-top: 10px;
 }
 
 .manage-main-content {
@@ -102,7 +106,6 @@
   margin-bottom: 10px;
 }
 
-/* Modal Styles */
 .manage-modal {
   position: fixed;
   top: 50%;
@@ -114,6 +117,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 600px;
+  max-height: 90vh; 
+  overflow-y: auto; 
   z-index: 1000;
 }
 
@@ -213,4 +218,45 @@
 
 .manage-trivia-info .delete{
   margin-left: 2px;
+}
+
+.manage-question-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px; /* Adds space between the question items */
+}
+
+.manage-question-info {
+  flex-grow: 1;
+  margin-right: 20px;
+}
+
+.manage-question-actions button {
+  margin-right: 10px; /* Adds spacing between Edit and Delete buttons */
+}
+
+.manage-question-item h4 {
+  margin: 0; /* Removes extra margin around the question text */
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.manage-question-item button {
+  padding: 5px 10px; /* Adds some padding to the buttons */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.manage-question-item button.delete {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+}
+
+.manage-question-item button.edit {
+  background-color: #40a9ff;
+  color: white;
+  border: none;
 }
