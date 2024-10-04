@@ -44,6 +44,10 @@
   margin-top: 10px;
 }
 
+.manage-sidebar .add-video {
+  margin-top: 10px;
+}
+
 .manage-main-content {
   width: 80%;
   background-color: #f7f9fc;
@@ -117,14 +121,14 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 600px;
-  max-height: 90vh; 
-  overflow-y: auto; 
+  max-height: 90vh;
+  overflow-y: auto;
   z-index: 1000;
 }
 
 .manage-modal img {
   max-width: 100%;
-  max-height: 200px; 
+  max-height: 200px;
   object-fit: contain;
   margin-bottom: 10px;
   border-radius: 5px;
@@ -216,7 +220,7 @@
   background-color: #1d6fbb;
 }
 
-.manage-trivia-info .delete{
+.manage-trivia-info .delete {
   margin-left: 2px;
 }
 
@@ -224,7 +228,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 15px; /* Adds space between the question items */
+  margin-bottom: 15px;
 }
 
 .manage-question-info {
@@ -233,17 +237,17 @@
 }
 
 .manage-question-actions button {
-  margin-right: 10px; /* Adds spacing between Edit and Delete buttons */
+  margin-right: 10px;
 }
 
 .manage-question-item h4 {
-  margin: 0; /* Removes extra margin around the question text */
+  margin: 0;
   font-weight: bold;
   font-size: 1.1rem;
 }
 
 .manage-question-item button {
-  padding: 5px 10px; /* Adds some padding to the buttons */
+  padding: 5px 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   cursor: pointer;
@@ -259,4 +263,169 @@
   background-color: #40a9ff;
   color: white;
   border: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 500px;
+  height: 250px;
+}
+
+.modal-content button {
+  background-color: #0d47a1;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  height: 30px;
+  width: 100px;
+}
+
+.modal-content .close {
+  margin-left: 10px;
+}
+
+.modal-content .tutotial-vid {
+  display: block;
+  margin-top: 20px;
+}
+
+.modal-content .upload-input {
+  background-color: #263c6d;
+  border-radius: 5px;
+  color: white;
+  font-size: 18px;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+  height: 30px;
+}
+
+.modal-content .upload-input:hover {
+  background-color: #40a9ff;
+}
+
+.loading-indicator {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #007bff;
+}
+
+.success-indicator {
+  margin-top: 20px;
+  font-size: 16px;
+  color: green;
+  font-weight: bold;
+}
+
+.modal-content p {
+  color: black;
+  font-weight: bold;
+  margin-top: 30px;
+  margin-bottom: 10px;
+
+}
+
+.modal-content .outlined {
+  margin-left: 10px;
+}
+
+.modal-content #video-title {
+  width: 460px;
+  border: solid 1px rgb(0, 0, 0);
+  border-radius: 5px;
+  height: 30px;
+  font-size: 16px;
+}
+
+.modal-content #video-title:hover {
+  border: solid 1px blue;
+}
+
+.modal-content #video-title::placeholder {
+  color: #aaa;
+  text-align: center;
+}
+
+.tutorial-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 300px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tutorial-video-wrapper {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.tutorial-video-wrapper video {
+  width: 100%;
+  max-width: 250px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.tutorial-title {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.tutorial-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.edit-btn,
+.delete-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+  background-color: #0056b3;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.manage-tutorial-items{
+  display: flex;
+  gap: 20px;
 }

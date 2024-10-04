@@ -1,59 +1,142 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { db } from "../../Connection/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+import { getStorage, getDownloadURL, ref } from "firebase/storage";
 import "./Tutorial.css";
-import Js from '../Videos/Js.mp4'
-
-const videoData = [
-  { src: Js, title: "Learn JavaScript" },
-  { src: Js, title: "Learn CSS" },
-  { src: Js, title: "Learn HTML" },
-  { src: Js, title: "Learn React" },
-  { src: Js, title: "Learn React" },
-];
 
 const Tutorials = () => {
   const videoRefs = useRef([]);
-  const [isPlaying, setIsPlaying] = useState(videoData.map(() => false)); 
+  const [videos, setVideos] = useState([]);
+  const [isPlaying, setIsPlaying] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [durations, setDurations] = useState([]);
+  const storage = getStorage();
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      setIsLoading(true);
+      try {
+        const videoCollection = collection(db, "tutorial-videos");
+        const videoSnapshot = await getDocs(videoCollection);
+        const videoList = await Promise.all(
+          videoSnapshot.docs.map(async (doc) => {
+            const data = doc.data();
+            const videoRef = ref(storage, data.videoPath);
+            const url = await getDownloadURL(videoRef);
+
+            return {
+              id: doc.id,
+              url,
+              thumbnail: data.thumbnail,
+              title: data.title,
+            };
+          })
+        );
+
+        setVideos(videoList);
+        setIsPlaying(new Array(videoList.length).fill(false));
+      } catch (error) {
+        console.error("Error fetching videos: ", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVideos();
+  }, []);
 
   const handlePlay = (index) => {
     videoRefs.current[index].play();
     const updatedPlayState = [...isPlaying];
-    updatedPlayState[index] = true; 
+    updatedPlayState[index] = true;
     setIsPlaying(updatedPlayState);
   };
 
   const handleVideoEnded = (index) => {
     const updatedPlayState = [...isPlaying];
-    updatedPlayState[index] = false; 
+    updatedPlayState[index] = false;
     setIsPlaying(updatedPlayState);
   };
 
+  const handleMetadataLoad = (index, event) => {
+    const duration = event.target.duration;
+    const updatedDurations = [...durations];
+    updatedDurations[index] = duration;
+    setDurations(updatedDurations);
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = entry.target.dataset.index;
+          const videoElement = videoRefs.current[index];
+          if (videoElement && !videoElement.src) {
+            videoElement.src = entry.target.dataset.src;
+          }
+        }
+      });
+    });
+
+    videoRefs.current.forEach((ref, index) => {
+      if (ref) {
+        observer.observe(ref);
+      }
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [videos]);
+
   return (
     <div className="tutorial-container">
-      <h2>Tutorials</h2>
+      <h1>Tutorials</h1>
+      {isLoading && (
+        <div className="video-container">
+          {Array(4)
+            .fill(0)
+            .map((_, index) => (
+              <div key={index} className="skeleton"></div>
+            ))}
+        </div>
+      )}
+
       <div className="video-container">
-        {videoData.map((video, index) => (
-          <div className="video-item" key={index}>
+        {videos.map((video, index) => (
+          <div className="video-item" key={video.id}>
             <div className="video-wrapper">
               <video
                 ref={(el) => (videoRefs.current[index] = el)}
+                onLoadedMetadata={(e) => handleMetadataLoad(index, e)}
+                poster={video.thumbnail || "path/to/default-poster.jpg"}
+                data-src={video.url}
+                data-index={index}
                 controls
-                poster="/path/to/your/thumbnail.png"
-                onEnded={() => handleVideoEnded(index)} 
+                onEnded={() => handleVideoEnded(index)}
               >
-                <source src={video.src} type="video/mp4" />
+                <source type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
-              {!isPlaying[index] && ( 
+              {!isPlaying[index] && (
                 <button
                   className="play-btn"
+                  aria-label="Play video"
                   onClick={() => handlePlay(index)}
                 >
                   ▶
                 </button>
               )}
             </div>
-            <p className="title-video">{video.title}</p>
+            <p className="title-video">{video.title || "Untitled Video"}</p>
+            <span className="duration">
+              {durations[index]
+                ? `${Math.floor(durations[index] / 60)}:${Math.floor(
+                    durations[index] % 60
+                  )}`
+                : "Loading..."}
+            </span>
           </div>
         ))}
       </div>

@@ -4,7 +4,15 @@ import "./AdminManagement.css";
 import { Modal } from "antd";
 import { getAuth } from "firebase/auth";
 import { db } from "../../Connection/firebaseConfig";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { UploadOutlined } from "@ant-design/icons";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  uploadBytesResumable,
+  deleteObject,
+} from "firebase/storage";
 import {
   collection,
   addDoc,
@@ -13,6 +21,7 @@ import {
   getDocs,
   deleteDoc,
   updateDoc,
+  setDoc,
 } from "firebase/firestore";
 import { message } from "antd";
 
@@ -46,8 +55,15 @@ const Manage = () => {
   const [userRole, setUserRole] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [showTutorialModal, setShowTutorialModal] = useState(false);
   const fileInputRef = useRef(null);
   const [imagePreviews, setImagePreviews] = useState({});
+  const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [title, setTitle] = useState("");
+  const [tutorialList, setTutorialList] = useState([]);
+  const [editingTutorialId, setEditingTutorialId] = useState(null);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -61,8 +77,35 @@ const Manage = () => {
     if (userRole === "admin") {
       fetchTrivia();
       fetchQuestions();
+      fetchTutorials();
     }
   }, [userRole]);
+
+  const fetchTutorials = async () => {
+    try {
+      const tutorialsCollection = collection(db, "tutorial-videos");
+      const tutorialSnapshot = await getDocs(tutorialsCollection);
+
+      const tutorialList = await Promise.all(
+        tutorialSnapshot.docs.map(async (doc) => {
+          const data = doc.data();
+          const videoRef = ref(storage, data.videoPath);
+          const videoUrl = await getDownloadURL(videoRef); // Get download URL
+
+          return {
+            id: doc.id,
+            videoUrl, // Store the URL for display
+            title: data.title,
+            videoPath: data.videoPath,
+          };
+        })
+      );
+
+      setTutorialList(tutorialList);
+    } catch (error) {
+      console.error("Error fetching tutorials: ", error);
+    }
+  };
 
   async function getUserRole() {
     const user = getAuth().currentUser;
@@ -332,6 +375,96 @@ const Manage = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setUploadSuccess(false);
+  };
+
+  const uploadVideo = async (file, title) => {
+    if (!file && !title) {
+      alert("Please provide a title or select a video file.");
+      return;
+    }
+
+    setIsLoading(true);
+    setUploadSuccess(false);
+
+    let videoUrl = null;
+
+    if (file) {
+      const storageRef = ref(storage, `tutorial-videos/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      await new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          () => {},
+          (error) => {
+            console.error("Upload failed:", error);
+            reject(error);
+          },
+          async () => {
+            videoUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve();
+          }
+        );
+      });
+    }
+
+    const videoData = {
+      videoPath: videoUrl
+        ? `tutorial-videos/${file.name}`
+        : tutorialList.find((t) => t.id === editingTutorialId)?.videoPath,
+      title: title || "Untitled Video",
+    };
+
+    try {
+      if (editingTutorialId) {
+        await updateDoc(
+          doc(db, "tutorial-videos", editingTutorialId),
+          videoData
+        );
+        message.success("Tutorial updated successfully!");
+        setEditingTutorialId(null); // Reset edit mode
+      } else {
+        await setDoc(doc(db, "tutorial-videos", file.name), videoData);
+        message.success("Video uploaded successfully!");
+      }
+
+      fetchTutorials(); // Refresh tutorial list
+      setShowTutorialModal(false); // Close modal
+    } catch (error) {
+      console.error("Error saving video metadata:", error);
+      message.error(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditTutorial = (tutorial) => {
+    setTitle(tutorial.title);
+    setFile(null);
+    setShowTutorialModal(true);
+    setEditingTutorialId(tutorial.id);
+  };
+
+  const handleDeleteTutorial = async (id, videoPath) => {
+    if (window.confirm("Are you sure you want to delete this tutorial?")) {
+      try {
+        await deleteDoc(doc(db, "tutorial-videos", id));
+
+        const storageRef = ref(storage, videoPath);
+        await deleteObject(storageRef);
+
+        message.success("Tutorial deleted successfully!");
+        fetchTutorials();
+      } catch (error) {
+        console.error("Error deleting tutorial: ", error);
+        message.error("Failed to delete tutorial.");
+      }
+    }
+  };
+
   return (
     <div className="manage-admin-management-dashboard">
       <div className="manage-sidebar">
@@ -347,6 +480,12 @@ const Manage = () => {
           onClick={() => setShowQuestionModal(true)}
         >
           Add question
+        </button>
+        <button
+          className="add-video"
+          onClick={() => setShowTutorialModal(true)}
+        >
+          Add New Toturial
         </button>
       </div>
       <div className="manage-main-content">
@@ -573,6 +712,55 @@ const Manage = () => {
           </>
         )}
 
+        {showTutorialModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <p className="text">Upload Tutorial Video</p>
+              <input
+                className="title-toturial"
+                placeholder="Video Title"
+                id="video-title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <div className="upload-input">
+                <label htmlFor="tutorial">
+                  Select Video <UploadOutlined className="outlined" />
+                </label>
+                <input
+                  className="upload-vid"
+                  id="tutorial"
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+              {isLoading && (
+                <div className="loading-indicator">Uploading...</div>
+              )}
+              {uploadSuccess && (
+                <div className="success-indicator">Upload Successful!</div>
+              )}
+              <div className="tutotial-vid">
+                <button
+                  className="add"
+                  onClick={() => uploadVideo(file, title)}
+                >
+                  {editingTutorialId ? "Update Video" : "Upload"}
+                </button>
+
+                <button
+                  className="close"
+                  onClick={() => setShowTutorialModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="manage-trivia-list manage-card">
           <h3>Existing Trivia</h3>
           {triviaList.length > 0 ? (
@@ -623,6 +811,44 @@ const Manage = () => {
             </ul>
           ) : (
             <p>No questions available.</p>
+          )}
+        </div>
+        <div className="manage-tutorial-list manage-card">
+          <h3>Existing Tutorials</h3>
+          {tutorialList.length > 0 ? (
+            <ul className="manage-tutorial-items">
+              {tutorialList.map((tutorial) => (
+                <li
+                  key={tutorial.id}
+                  className="manage-tutorial-item tutorial-card"
+                >
+                  <div className="tutorial-video-wrapper">
+                    <video controls src={tutorial.videoUrl}>
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  <h4 className="tutorial-title">{tutorial.title}</h4>
+                  <div className="tutorial-actions">
+                    <button
+                      onClick={() => handleEditTutorial(tutorial)}
+                      className="edit-btn"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() =>
+                        handleDeleteTutorial(tutorial.id, tutorial.videoPath)
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No tutorials available.</p>
           )}
         </div>
       </div>
