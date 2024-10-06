@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import "./LoginPage.css";
-import { message } from "antd";
+import { message, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import Logo from "../Image/trivia-logo.png";
 import { auth } from "../../Connection/firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../../Connection/firebaseConfig";
@@ -26,6 +27,9 @@ const LoginPage = () => {
     level_id: "",
     profile_picture: null,
   });
+
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+  const [emailForReset, setEmailForReset] = useState("");
 
   const navigate = useNavigate();
 
@@ -83,34 +87,34 @@ const LoginPage = () => {
       level_id,
       profile_picture,
     } = formData;
-  
+
     try {
       const userIdDocRef = doc(db, "counters", "user_id_counter");
       const userIdDoc = await getDoc(userIdDocRef);
-  
-      let newUserId = 1; 
-  
+
+      let newUserId = 1;
+
       if (userIdDoc.exists()) {
-        newUserId = userIdDoc.data().currentId + 1; 
-        await setDoc(userIdDocRef, { currentId: newUserId }); 
+        newUserId = userIdDoc.data().currentId + 1;
+        await setDoc(userIdDocRef, { currentId: newUserId });
       } else {
         await setDoc(userIdDocRef, { currentId: newUserId });
       }
-  
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
       const user = userCredential.user;
-  
+
       let profilePicUrl = "";
       if (profile_picture) {
         profilePicUrl = await uploadProfilePicture(profile_picture, user.uid);
       }
-  
+
       await setDoc(doc(db, "users", user.uid), {
-        user_id: newUserId, 
+        user_id: newUserId,
         firstname,
         lastname,
         username,
@@ -119,7 +123,7 @@ const LoginPage = () => {
         profile_picture_url: profilePicUrl,
         createdAt: new Date(),
       });
-  
+
       message.success("Sign up successful!");
     } catch (error) {
       console.error(error);
@@ -164,6 +168,33 @@ const LoginPage = () => {
       );
       console.error(error.message);
     }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!emailForReset) {
+      message.error("Please enter your email address.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, emailForReset);
+      message.success(
+        "Success! A password reset email has been sent. Please check your inbox to reset your password."
+      );
+      setIsResetModalVisible(false);
+      setEmailForReset("");
+    } catch (error) {
+      console.error(error);
+      message.error("Error sending password reset email: " + error.message);
+    }
+  };
+
+  const showResetModal = () => {
+    setIsResetModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsResetModalVisible(false);
+    setEmailForReset("");
   };
 
   return (
@@ -268,7 +299,9 @@ const LoginPage = () => {
               placeholder="Password"
               required
             />
-            <a href="#">Forget Your Password?</a>
+            <a href="#" onClick={showResetModal}>
+              Forget Your Password?
+            </a>
             <button onClick={handleSignIn}>Login</button>
           </form>
         </div>
@@ -299,6 +332,23 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+
+      <Modal
+        title="Reset Your Password"
+        visible={isResetModalVisible}
+        onOk={handlePasswordReset}
+        onCancel={handleCancel}
+        okText="Send Reset Email"
+      >
+        <input
+          type="email"
+          placeholder="Enter your email"
+          value={emailForReset}
+          onChange={(e) => setEmailForReset(e.target.value)}
+          required
+          style={{ width: "100%", padding: "8px", marginTop: "10px" }}
+        />
+      </Modal>
     </div>
   );
 };
