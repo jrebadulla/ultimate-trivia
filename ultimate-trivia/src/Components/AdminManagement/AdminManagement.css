@@ -205,22 +205,7 @@
   z-index: 999;
 }
 
-.manage-trivia-info button {
-  margin-top: 10px;
-  padding: 10px 20px;
-  background-color: #2b85d3;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.manage-trivia-info button:hover {
-  background-color: #1d6fbb;
-}
-
-.manage-trivia-info .delete {
+.manage-trivia-info .delete-btn {
   margin-left: 2px;
 }
 
@@ -338,7 +323,6 @@
   font-weight: bold;
   margin-top: 30px;
   margin-bottom: 10px;
-
 }
 
 .modal-content .outlined {
@@ -425,7 +409,65 @@
   background-color: #c82333;
 }
 
-.manage-tutorial-items{
+.manage-tutorial-items {
   display: flex;
   gap: 20px;
+}
+
+.pagination {
+  margin-top: 30px;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  padding: 10px;
+  list-style: none;
+  gap: 10px;
+}
+
+.pagination li {
+  display: inline-block;
+  padding: 8px 12px;
+  margin: 0 3px;
+  cursor: pointer;
+  background-color: #f4f4f4;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.pagination li:hover {
+  background-color: #d9d9d9;
+}
+
+.pagination li.active {
+  font-weight: bold;
+  background-color: #1890ff;
+  color: white;
+}
+
+.pagination li.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pagination li a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.search-question {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 40%;
+  max-width: 600px;
+  padding-left: 35px;
+  font-size: 16px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s ease;
+}
+
+.search-question:hover,
+.search-question:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 10px rgba(24, 144, 255, 0.2);
 }
