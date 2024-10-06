@@ -58,13 +58,13 @@ const DashboardLayout = () => {
         <img src={Logo} alt="Ultimate Trivia Logo" />
         <h3>Ultimate Trivia</h3>
         <div className="links">
-          {userRole === "admin" && ( // Conditionally render the Manage link
-            <a href="#!" onClick={handleManageClick}>Manage</a>
+          {userRole === "admin" && ( 
+            <a href="#!" onClick={handleManageClick}>Admin</a>
           )}
           <a onClick={handleTriviaClick}>Trivia</a>
           <a href="#!" onClick={handleTutorialClick}>Tutorials</a>
-          <a href="#!" onClick={handleQuizClick}>Quiz Game</a>
-          <a href="#!" onClick={handleCompilerClick}>Compiler</a>
+          <a href="#!" onClick={handleQuizClick}>Quiz Games</a>
+          <a href="#!" onClick={handleCompilerClick}>Online Compiler</a>
           <a href="#!">Statistics</a>
         </div>
         <div 
