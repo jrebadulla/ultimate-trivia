@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, where, updateDoc } from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./FillInTheBlank.css";
 
@@ -15,6 +15,14 @@ const FillInTheBlank = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const gameId = 3;
+
+  const shuffle = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
 
   useEffect(() => {
     setStartTime(new Date());
@@ -38,7 +46,7 @@ const FillInTheBlank = () => {
           where("level_id", "==", parseInt(levelId))
         );
         const questionsSnapshot = await getDocs(q);
-        const questionsList = questionsSnapshot.docs.map((doc) => ({
+        let questionsList = questionsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -46,6 +54,7 @@ const FillInTheBlank = () => {
         if (questionsList.length === 0) {
           setError("No questions available for this level.");
         } else {
+          questionsList = shuffle(questionsList); 
           setQuestions(questionsList);
         }
       } catch (fetchError) {
@@ -88,22 +97,43 @@ const FillInTheBlank = () => {
     const timeTaken = calculatePlaytime();
     const difficultyLevel = "medium";
     const dateTime = new Date();
-
+  
+    const scoresRef = collection(db, "userScores");
+    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", gameId));
+  
     try {
-      await addDoc(collection(db, "userScores"), {
-        userId,
-        game_id: gameId,
-        score: correctAnswers,
-        totalQuestions,
-        correctAnswers,
-        incorrectAnswers,
-        dateTime,
-        timeTaken,
-        difficultyLevel,
-      });
-      console.log("Score saved successfully");
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        // No existing score, create new
+        await addDoc(scoresRef, {
+          userId,
+          game_id: gameId,
+          score: correctAnswers,
+          totalQuestions,
+          correctAnswers,
+          incorrectAnswers,
+          dateTime,
+          timeTaken,
+          difficultyLevel,
+        });
+      } else {
+
+        querySnapshot.forEach(async (doc) => {
+          if (doc.data().score < correctAnswers) {
+            await updateDoc(doc.ref, {
+              score: correctAnswers,
+              correctAnswers,
+              incorrectAnswers,
+              dateTime,
+              timeTaken,
+              difficultyLevel,
+            });
+          }
+        });
+      }
+      console.log("Score saved/updated successfully");
     } catch (error) {
-      console.error("Error saving score:", error);
+      console.error("Error saving/updating score:", error);
     }
   };
 
