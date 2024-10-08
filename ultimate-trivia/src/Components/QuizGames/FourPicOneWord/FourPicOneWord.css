@@ -74,13 +74,6 @@
   background: #f5a623;
 }
 
-.FourPic-status-message {
-  font-size: 1.2rem;
-  color: #f5f5f5;
-  margin-top: 20px;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
-}
-
 .correct {
   border-color: #4caf50;
 }
@@ -134,4 +127,38 @@
   height: auto; /* Maintain aspect ratio */
   border: 1px solid #ccc; /* Optional styling */
   border-radius: 8px; /* Optional styling */
+}
+
+.FourPic-game-over {
+  text-align: center;
+  margin-top: 50px;
+  padding: 20px;
+  border: 2px solid #ff4757;
+  border-radius: 10px;
+  background: #f1f2f6;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.FourPic-game-over h2 {
+  font-size: 2rem;
+  color: #2f3542;
+}
+
+.FourPic-play-again-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.FourPic-play-again-button:hover {
+  background-color: #e84118;
+}
+
+.FourPic-game-over p{
+  color: #1c2b47;
 }
