@@ -104,7 +104,6 @@ const FillInTheBlank = () => {
     try {
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
-        // No existing score, create new
         await addDoc(scoresRef, {
           userId,
           game_id: gameId,
@@ -172,17 +171,18 @@ const FillInTheBlank = () => {
   return (
     <div>
       {quizFinished ? (
-        <div className="results">
-          <h2 className="modal-header">Game Over!</h2>
-          <h3>
-            Total Score: {totalCorrectAnswers} / {questions.length}
-          </h3>
-          <p>Total Playtime: {calculatePlaytime()} seconds</p>
-          <p>Played on: {currentDay}</p>
-          <button className="play-again-button" onClick={handlePlayAgain}>
-            Play Again
-          </button>
-        </div>
+       <div className="FourPic-game-over">
+       <h2>Game Over!</h2>
+       <p>
+         Your final score is: <span className="FourPic-score">{totalCorrectAnswers} / {questions.length}</span>
+       </p>
+       <button
+         onClick={handlePlayAgain}
+         className="FourPic-play-again-button"
+       >
+         Play Again
+       </button>
+     </div>
       ) : (
         <div>
           <p className="level">Level {currentQuestionIndex + 1}</p>
