@@ -123,10 +123,10 @@
 }
 
 .FourPic-image {
-  width: 23%; /* Adjust width as necessary */
-  height: auto; /* Maintain aspect ratio */
-  border: 1px solid #ccc; /* Optional styling */
-  border-radius: 8px; /* Optional styling */
+  width: 23%; 
+  height: auto; 
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
 }
 
 .FourPic-game-over-container {
@@ -143,7 +143,7 @@
   background: linear-gradient(135deg, #ff6b81, #ff4757);
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4); /* More prominent shadow */
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
   animation: popIn 0.6s ease-out;
   transform: scale(0.95);
 }
@@ -153,7 +153,7 @@
   color: #ffffff;
   margin-bottom: 20px;
   letter-spacing: 2px;
-  text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3); /* Added text shadow for depth */
+  text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3); 
 }
 
 .FourPic-game-over p {
@@ -164,7 +164,7 @@
 
 .FourPic-score {
   font-size: 2.5rem;
-  color: #ffeaa7; /* Gold color for score */
+  color: #ffeaa7; 
   font-weight: bold;
   text-shadow: 1px 3px 5px rgba(0, 0, 0, 0.4);
 }
@@ -185,7 +185,7 @@
 .FourPic-play-again-button:hover {
   background-color: #e84118;
   transform: scale(1.1);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* More hover depth */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); 
 }
 
 .FourPic-close-button {

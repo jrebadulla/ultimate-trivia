@@ -16,6 +16,7 @@ const BubblePopQuiz = React.memo(() => {
   const [error, setError] = useState("");
   const [popBubbleId, setPopBubbleId] = useState(null);
   const gameId = 1;
+  const gameName = "Bubble Script Challenge";
 
   const currentQuestion = useMemo(
     () => questions[currentQuestionIndex],
@@ -165,23 +166,33 @@ const BubblePopQuiz = React.memo(() => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
+    const level_id = localStorage.getItem("level_id");
     const game_id = currentQuestion?.game_id;
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
-    const timeTaken = 100 - timeLeft;
+    const timeTaken = 100 - timeLeft; 
     const difficultyLevel = "medium";
     const dateTime = new Date();
   
     const scoresRef = collection(db, "userScores");
-    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", game_id));
+  
+    const q = query(
+      scoresRef,
+      where("userId", "==", userId),
+      where("game_id", "==", game_id),
+      where("level_id", "==", level_id)
+    );
   
     try {
       const querySnapshot = await getDocs(q);
+      
       if (querySnapshot.empty) {
         await addDoc(scoresRef, {
           userId,
           game_id,
+          game_name: gameName,
+          level_id,
           score: correctAnswers,
           totalQuestions,
           correctAnswers,
@@ -191,17 +202,17 @@ const BubblePopQuiz = React.memo(() => {
           difficultyLevel,
         });
       } else {
+
         querySnapshot.forEach(async (doc) => {
-          if (doc.data().score < correctAnswers) { 
-            await updateDoc(doc.ref, {
-              score: correctAnswers,
-              correctAnswers,
-              incorrectAnswers,
-              dateTime,
-              timeTaken,
-              difficultyLevel,
-            });
-          }
+          await updateDoc(doc.ref, {
+            totalQuestions,
+            score: correctAnswers,
+            correctAnswers,
+            incorrectAnswers,
+            dateTime,
+            timeTaken,
+            difficultyLevel,
+          });
         });
       }
     } catch (error) {

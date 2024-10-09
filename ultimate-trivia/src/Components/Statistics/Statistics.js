@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Radar, Line } from "react-chartjs-2";
 import "./Statistics.css";
+import noFound from './no_data_icon.png';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,6 +18,7 @@ import {
 
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../Connection/firebaseConfig";
+import ActiveComponentContext from "../Dashboard/ActiveComponentContext";
 
 ChartJS.register(
   CategoryScale,
@@ -32,6 +34,7 @@ ChartJS.register(
 );
 
 const UserStatistics = () => {
+  const { setActiveComponent } = useContext(ActiveComponentContext);
   const [chartData, setChartData] = useState({});
   const [timeData, setTimeData] = useState({});
   const [suggestions, setSuggestions] = useState([]);
@@ -42,9 +45,10 @@ const UserStatistics = () => {
     const fetchUserScores = async () => {
       setIsLoading(true);
       const userId = localStorage.getItem("user_id");
+      const levelId = localStorage.getItem("level_id");
 
-      if (!userId) {
-        console.error("User ID not found in localStorage");
+      if (!userId || !levelId) {
+        console.error("User ID or Level ID not found in localStorage");
         setNoData(true);
         setIsLoading(false);
         return;
@@ -64,7 +68,10 @@ const UserStatistics = () => {
 
         const data = querySnapshot.docs.map((doc) => doc.data());
         console.log("Data ready for processing:", data);
-        processChartData(data);
+
+        const filteredData = data.filter((item) => item.level_id === levelId);
+
+        processChartData(filteredData);
       } catch (error) {
         console.error("Error fetching user scores:", error);
         setNoData(true);
@@ -84,7 +91,7 @@ const UserStatistics = () => {
       return;
     }
 
-    const labels = data.map((item) => `Game ${item.game_id}`);
+    const labels = data.map((item) => `${item.game_name}`);
     const correctAnswers = data.map((item) => item.correctAnswers);
     const incorrectAnswers = data.map((item) => item.incorrectAnswers);
     const times = data.map((item) => (item.timeTaken / 60).toFixed(2));
@@ -119,6 +126,8 @@ const UserStatistics = () => {
           backgroundColor: "rgba(75, 192, 192, 0.2)",
           fill: true,
           tension: 0.4,
+          pointRadius: 5,
+          pointBackgroundColor: "white",
         },
       ],
     });
@@ -127,19 +136,118 @@ const UserStatistics = () => {
       data.map((item) => {
         const correctRate = (item.correctAnswers / item.totalQuestions) * 100;
         return correctRate >= 80
-          ? `Great job in Game ${item.game_id}, keep it up!`
+          ? {
+              text: `Great job in Game ${item.game_name}, keep it up!`,
+              icon: "success",
+            }
           : correctRate >= 50
-          ? `You're doing well in Game ${item.game_id}, but there's room for improvement.`
-          : `Keep practicing in Game ${item.game_id}, you'll improve!`;
+          ? {
+              text: `You're doing well in Game ${item.game_name}, but there's room for improvement.`,
+              icon: "warning",
+            }
+          : {
+              text: `Keep practicing in Game ${item.game_name}, you'll improve!`,
+              icon: "improve",
+            };
       })
     );
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (noData)
+  const radarOptions = {
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        angleLines: { color: "rgba(255, 255, 255, 0.5)" },
+        grid: { color: "rgba(255, 255, 255, 0.2)" },
+        ticks: { display: false },
+        pointLabels: {
+          color: "rgba(255, 255, 255, 0.8)",
+          font: { size: 14 },
+        },
+      },
+    },
+    plugins: {
+      legend: { labels: { color: "white" } },
+      tooltip: {
+        enabled: true,
+        mode: "index",
+        intersect: false,
+        callbacks: {
+          label: function (tooltipItems) {
+            return `${tooltipItems.dataset.label}: ${tooltipItems.raw}`;
+          },
+        },
+      },
+    },
+  };
+
+  const lineOptions = {
+    responsive: true,
+    scales: {
+      y: { beginAtZero: true, ticks: { color: "#ffffff" } },
+      x: { ticks: { color: "#ffffff" } },
+    },
+    plugins: {
+      legend: { labels: { color: "#ffffff" } },
+    },
+  };
+
+  if (isLoading) {
     return (
-      <div>No data available. Please play a quiz to see your statistics.</div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          backgroundColor: "#282c34",
+        }}
+      >
+        <div className="spinner"></div>
+      </div>
     );
+  }
+
+  if (noData) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          backgroundColor: "#282c34",
+          color: "white",
+          textAlign: "center",
+          padding: "20px",
+        }}
+      >
+        <img
+          src={noFound}
+          alt="No Data"
+          style={{ width: "100px", marginBottom: "20px" }}
+        />
+        <h2>No Data Available</h2>
+        <p>Please play a quiz to see your statistics, or check back later.</p>
+        <button
+          onClick={() => setActiveComponent("quiz")}
+          style={{
+            marginTop: "20px",
+            padding: "10px 20px",
+            fontSize: "16px",
+            color: "#282c34",
+            backgroundColor: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Take a Quiz Now
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -164,26 +272,7 @@ const UserStatistics = () => {
           }}
         >
           {chartData && chartData.datasets && (
-            <Radar
-              data={chartData}
-              options={{
-                maintainAspectRatio: false,
-                scales: {
-                  r: {
-                    angleLines: { color: "rgba(255, 255, 255, 0.5)" },
-                    grid: { color: "rgba(255, 255, 255, 0.2)" },
-                    ticks: { display: false },
-                    pointLabels: {
-                      color: "rgba(255, 255, 255, 0.8)",
-                      font: { size: 14 },
-                    },
-                  },
-                },
-                plugins: {
-                  legend: { labels: { color: "white" } },
-                },
-              }}
-            />
+            <Radar data={chartData} options={radarOptions} />
           )}
         </div>
         <div
@@ -195,19 +284,7 @@ const UserStatistics = () => {
           }}
         >
           {timeData && timeData.datasets && (
-            <Line
-              data={timeData}
-              options={{
-                responsive: true,
-                scales: {
-                  y: { beginAtZero: true, ticks: { color: "#ffffff" } },
-                  x: { ticks: { color: "#ffffff" } },
-                },
-                plugins: {
-                  legend: { labels: { color: "#ffffff" } },
-                },
-              }}
-            />
+            <Line data={timeData} options={lineOptions} />
           )}
         </div>
       </div>
@@ -228,7 +305,11 @@ const UserStatistics = () => {
         <ul style={{ listStyle: "none", padding: 0, textAlign: "center" }}>
           {suggestions.map((suggestion, index) => (
             <li key={index} style={{ color: "white", marginBottom: "10px" }}>
-              {suggestion}
+              <span
+                className={`icon-${suggestion.icon}`}
+                style={{ marginRight: "8px" }}
+              ></span>
+              {suggestion.text}
             </li>
           ))}
         </ul>

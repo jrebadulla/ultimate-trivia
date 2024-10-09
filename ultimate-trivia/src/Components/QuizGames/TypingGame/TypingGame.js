@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, query, where, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./TypingGame.css";
 
@@ -14,10 +21,11 @@ const TypingGame = () => {
   const [gameFinished, setGameFinished] = useState(false);
   const [userScore, setUserScore] = useState(0);
   const [timer, setTimer] = useState(60);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [gameStatus, setGameStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const gameId = 4;
+  const gameName = "Sql Type Master";
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -43,11 +51,7 @@ const TypingGame = () => {
       setQuestions(questionsList);
       setLoading(false);
       if (questionsList.length > 0) {
-        const randomQuestion =
-          questionsList[Math.floor(Math.random() * questionsList.length)];
-        setSnippet(randomQuestion.question_text);
-        setCurrentQuestion(randomQuestion);
-        setLoading(false);
+        setSnippet(questionsList[0].question_text);
       }
     };
 
@@ -62,13 +66,11 @@ const TypingGame = () => {
       }, 1000);
     } else if (timer === 0) {
       setGameFinished(true);
-      setUserInput(snippet);
-      setTimeTaken(60);
       saveUserScore(calculateScore());
     }
 
     return () => clearInterval(interval);
-  }, [timer, gameFinished, snippet]);
+  }, [timer, gameFinished]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -93,10 +95,15 @@ const TypingGame = () => {
 
       const calculatedScore = Math.round(calculatedAccuracy);
       setUserScore(calculatedScore);
-
-      setGameFinished(true);
       saveUserScore(calculatedScore, timeSpent);
-      clearInterval();
+
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        setSnippet(questions[currentQuestionIndex + 1].question_text);
+        setUserInput("");
+      } else {
+        setGameFinished(true);
+      }
     }
   };
 
@@ -108,11 +115,10 @@ const TypingGame = () => {
     setEndTime(null);
     setTimer(60);
     setGameFinished(false);
+    setCurrentQuestionIndex(0);
+
     if (questions.length > 0) {
-      const randomQuestion =
-        questions[Math.floor(Math.random() * questions.length)];
-      setSnippet(randomQuestion.question_text);
-      setCurrentQuestion(randomQuestion);
+      setSnippet(questions[0].question_text);
     }
   };
 
@@ -122,6 +128,7 @@ const TypingGame = () => {
 
   const saveUserScore = async (calculatedScore, finalTimeTaken) => {
     const userId = localStorage.getItem("user_id");
+    const level_id = localStorage.getItem("level_id");
     const game_id = gameId;
     const totalQuestions = questions.length;
     const correctAnswers = calculatedScore;
@@ -130,15 +137,22 @@ const TypingGame = () => {
     const dateTime = new Date();
 
     const scoresRef = collection(db, "userScores");
-    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", gameId));
+    const q = query(
+      scoresRef,
+      where("userId", "==", userId),
+      where("game_id", "==", gameId),
+      where("level_id", "==", level_id)
+    );
 
     try {
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
         await addDoc(scoresRef, {
           userId,
+          level_id,
           game_id,
           score: correctAnswers,
+          game_name: gameName,
           totalQuestions,
           correctAnswers,
           incorrectAnswers,
@@ -149,17 +163,16 @@ const TypingGame = () => {
         console.log("Score saved successfully");
       } else {
         querySnapshot.forEach(async (doc) => {
-          if (doc.data().score < correctAnswers) {
-            await updateDoc(doc.ref, {
-              score: correctAnswers,
-              correctAnswers,
-              incorrectAnswers,
-              dateTime,
-              timeTaken: finalTimeTaken,
-              difficultyLevel,
-            });
-            console.log("Score updated successfully");
-          }
+          await updateDoc(doc.ref, {
+            totalQuestions,
+            score: correctAnswers,
+            correctAnswers,
+            incorrectAnswers,
+            dateTime,
+            timeTaken: finalTimeTaken,
+            difficultyLevel,
+          });
+          console.log("Score updated successfully");
         });
       }
     } catch (error) {
@@ -178,16 +191,13 @@ const TypingGame = () => {
   return (
     <div>
       <div>
-      <p className="level">Level {questions.indexOf(currentQuestion) + 1}</p>
-
+        <p className="level">Level {currentQuestionIndex + 1}</p>
       </div>
       <div className="typing-game">
         {!gameFinished ? (
           <>
             <h2>Type the Code Snippet Below</h2>
-
             <pre>{snippet}</pre>
-
             <input
               type="text"
               value={userInput}
@@ -199,17 +209,17 @@ const TypingGame = () => {
           </>
         ) : (
           <div className="FourPic-game-over">
-          <h2>Game Over!</h2>
-          <p>
-            Your final score is: <span className="FourPic-score">{userScore}/{questions.length}</span>
-          </p>
-          <button
-            onClick={resetGame}
-            className="FourPic-play-again-button"
-          >
-            Play Again
-          </button>
-        </div>
+            <h2>Game Over!</h2>
+            <p>
+              Your final score is:{" "}
+              <span className="FourPic-score">
+                {userScore}/{questions.length}
+              </span>
+            </p>
+            <button onClick={resetGame} className="FourPic-play-again-button">
+              Play Again
+            </button>
+          </div>
         )}
       </div>
     </div>

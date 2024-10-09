@@ -6,7 +6,7 @@ import {
   query,
   where,
   updateDoc,
-  doc
+  doc,
 } from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./MultipleChoice.css";
@@ -19,6 +19,7 @@ const MultipleChoice = () => {
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(true);
   const gameId = 2;
+  const gameName = "Code Choice Python";
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -98,15 +99,21 @@ const MultipleChoice = () => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
+    const level_id = localStorage.getItem("level_id");
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
-    const timeTaken = timer; 
+    const timeTaken = timer;
     const difficultyLevel = "medium";
     const dateTime = new Date();
   
     const scoresRef = collection(db, "userScores");
-    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", gameId));
+    const q = query(
+      scoresRef,
+      where("userId", "==", userId),
+      where("game_id", "==", gameId),
+      where("level_id", "==", level_id)
+    );
   
     try {
       const querySnapshot = await getDocs(q);
@@ -114,6 +121,8 @@ const MultipleChoice = () => {
       if (querySnapshot.empty) {
         await addDoc(scoresRef, {
           userId,
+          level_id,
+          game_name: gameName,
           game_id: gameId,
           score: correctAnswers,
           totalQuestions,
@@ -123,21 +132,18 @@ const MultipleChoice = () => {
           timeTaken,
           difficultyLevel,
         });
-        console.log("Score saved successfully");
       } else {
-
         querySnapshot.forEach(async (doc) => {
-          if (doc.data().score < correctAnswers) {
-            await updateDoc(doc.ref, {
-              score: correctAnswers,
-              correctAnswers,
-              incorrectAnswers,
-              dateTime,
-              timeTaken,
-              difficultyLevel,
-            });
-            console.log("Score updated successfully");
-          }
+          await updateDoc(doc.ref, {
+            totalQuestions,
+            score: correctAnswers,
+            correctAnswers,
+            incorrectAnswers,
+            dateTime,
+            timeTaken,
+            difficultyLevel,
+          });
+          console.log("Score updated successfully");
         });
       }
     } catch (error) {

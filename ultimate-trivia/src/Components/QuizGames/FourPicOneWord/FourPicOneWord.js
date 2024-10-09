@@ -24,6 +24,7 @@ const FourPicsOneWord = () => {
 
   const userId = localStorage.getItem("user_id");
   const gameId = 5;
+  const gameName = "Pic Code Challenge"
 
   const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -112,6 +113,7 @@ const FourPicsOneWord = () => {
   };
 
   const saveUserScore = async (calculatedScore, finalTimeTaken) => {
+    const level_id = localStorage.getItem("level_id");
     const game_id = gameId;
     const totalQuestions = questions.length;
     const correctAnswers = calculatedScore;
@@ -123,7 +125,8 @@ const FourPicsOneWord = () => {
     const q = query(
       scoresRef,
       where("userId", "==", userId),
-      where("game_id", "==", game_id)
+      where("game_id", "==", game_id),
+      where("level_id", "==", level_id)
     );
 
     try {
@@ -131,6 +134,8 @@ const FourPicsOneWord = () => {
       if (querySnapshot.empty) {
         await addDoc(scoresRef, {
           userId,
+          level_id,
+          game_name: gameName,
           game_id,
           score: correctAnswers,
           totalQuestions,
@@ -144,6 +149,7 @@ const FourPicsOneWord = () => {
         querySnapshot.forEach(async (doc) => {
           if (doc.data().score < correctAnswers) {
             await updateDoc(doc.ref, {
+              totalQuestions,
               score: correctAnswers,
               correctAnswers,
               incorrectAnswers,

@@ -8,6 +8,7 @@ import Compiler from "../Compiler/Compiler";
 import Trivia from "../Trivia/Trivia";
 import Manage from "../AdminManagement/AdminManagement";
 import UserStatistics from "../Statistics/Statistics";
+import ActiveComponentContext from "./ActiveComponentContext";
 
 const DashboardLayout = () => {
   const [firstname, setFirstname] = useState("");
@@ -18,6 +19,7 @@ const DashboardLayout = () => {
   const [isLevelDropdownVisible, setLevelDropdownVisible] = useState(false);
   const [userRole, setUserRole] = useState("");
   const dropdownRef = useRef(null);
+  const [selectedYear, setSelectedYear] = useState(localStorage.getItem('selectedYear') || 'Year Level');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +29,12 @@ const DashboardLayout = () => {
       localStorage.getItem("profile_picture") || "/path/to/default-image.jpg"
     );
     setUserRole(localStorage.getItem("role") || "user");
+
+    const storedActiveComponent = localStorage.getItem("activeComponent");
+    if (storedActiveComponent) {
+        setActiveComponent(storedActiveComponent);
+    }
+
     console.log(userRole);
   }, []);
 
@@ -55,6 +63,7 @@ const DashboardLayout = () => {
   };
 
   const handleSignInOut = () => {
+    localStorage.clear();
     navigate("/signOut");
     setIsDropdownVisible(false);
   };
@@ -82,9 +91,30 @@ const DashboardLayout = () => {
   };
 
   const handleYearClick = (yearLevel) => {
+    let yearLabel = '';
+    switch (yearLevel) {
+      case 1:
+        yearLabel = 'First Year';
+        break;
+      case 2:
+        yearLabel = 'Second Year';
+        break;
+      case 3:
+        yearLabel = 'Third Year';
+        break;
+      case 4:
+        yearLabel = 'Fourth Year';
+        break;
+      default:
+        yearLabel = 'Year Level';
+        localStorage.setItem('selectedYear', yearLabel);
+    }
+    setSelectedYear(yearLabel);
+    localStorage.setItem('selectedYear', yearLabel); 
     localStorage.setItem("level_id", yearLevel);
-    console.log(`Level ID updated to: ${yearLevel}`);
+    localStorage.setItem("activeComponent", activeComponent);
     setLevelDropdownVisible(false);
+    window.location.reload();
   };
 
   return (
@@ -112,9 +142,9 @@ const DashboardLayout = () => {
             Statistics
           </a>
           <div>
-            <a href="#!" onClick={handleYearLevelClick}>
-              Year Level
-            </a>
+          <a href="#!" onClick={handleYearLevelClick}>
+        {selectedYear}
+      </a>
             {isLevelDropdownVisible && (
               <div  ref={dropdownRef} className="dropdown">
                 <ul>
@@ -200,6 +230,7 @@ const DashboardLayout = () => {
           )}
         </div>
       </div>
+      <ActiveComponentContext.Provider value={{ activeComponent, setActiveComponent }}>
       <div className="content">
         {activeComponent === "tutorial" && <Tutorials />}
         {activeComponent === "quiz" && <QuizDashboard />}
@@ -208,6 +239,7 @@ const DashboardLayout = () => {
         {activeComponent === "statistics" && <UserStatistics />}
         {activeComponent === "manage" && <Manage userRole={userRole} />}
       </div>
+      </ActiveComponentContext.Provider>
     </div>
   );
 };
