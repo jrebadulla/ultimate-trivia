@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  updateDoc,
+  doc
+} from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./MultipleChoice.css";
 
@@ -11,6 +19,14 @@ const MultipleChoice = () => {
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(true);
   const gameId = 2;
+
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -42,7 +58,8 @@ const MultipleChoice = () => {
           };
         });
 
-        setQuestions(loadedQuestions);
+        const shuffledQuestions = shuffleArray(loadedQuestions);
+        setQuestions(shuffledQuestions);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching questions from Firebase:", error);
@@ -81,29 +98,50 @@ const MultipleChoice = () => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
-    const game_id = gameId;
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
-    const timeTaken = timer;
+    const timeTaken = timer; 
     const difficultyLevel = "medium";
     const dateTime = new Date();
-
+  
+    const scoresRef = collection(db, "userScores");
+    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", gameId));
+  
     try {
-      await addDoc(collection(db, "userScores"), {
-        userId,
-        game_id,
-        score: correctAnswers,
-        totalQuestions,
-        correctAnswers,
-        incorrectAnswers,
-        dateTime,
-        timeTaken,
-        difficultyLevel,
-      });
-      console.log("Score saved successfully");
+      const querySnapshot = await getDocs(q);
+  
+      if (querySnapshot.empty) {
+        await addDoc(scoresRef, {
+          userId,
+          game_id: gameId,
+          score: correctAnswers,
+          totalQuestions,
+          correctAnswers,
+          incorrectAnswers,
+          dateTime,
+          timeTaken,
+          difficultyLevel,
+        });
+        console.log("Score saved successfully");
+      } else {
+
+        querySnapshot.forEach(async (doc) => {
+          if (doc.data().score < correctAnswers) {
+            await updateDoc(doc.ref, {
+              score: correctAnswers,
+              correctAnswers,
+              incorrectAnswers,
+              dateTime,
+              timeTaken,
+              difficultyLevel,
+            });
+            console.log("Score updated successfully");
+          }
+        });
+      }
     } catch (error) {
-      console.error("Error saving score:", error);
+      console.error("Error saving/updating score:", error);
     }
   };
 
@@ -112,6 +150,7 @@ const MultipleChoice = () => {
     setTotalCorrectAnswers(0);
     setQuizFinished(false);
     setTimer(0);
+    setQuestions((prevQuestions) => shuffleArray([...prevQuestions]));
   };
 
   if (loading) {
@@ -127,15 +166,18 @@ const MultipleChoice = () => {
   return (
     <div>
       {quizFinished ? (
-        <div className="results">
-          <h2 className="modal-header">Game Over!</h2>
-          <div className="score-summary">
-            <h3>
-              Total Score: {totalCorrectAnswers} / {questions.length}
-            </h3>
-            <h3>Time Taken: {timer} seconds</h3>
-          </div>
-          <button className="play-again-button" onClick={handlePlayAgain}>
+        <div className="FourPic-game-over">
+          <h2>Game Over!</h2>
+          <p>
+            Your final score is:{" "}
+            <span className="FourPic-score">
+              {totalCorrectAnswers} / {questions.length}
+            </span>
+          </p>
+          <button
+            onClick={handlePlayAgain}
+            className="FourPic-play-again-button"
+          >
             Play Again
           </button>
         </div>
