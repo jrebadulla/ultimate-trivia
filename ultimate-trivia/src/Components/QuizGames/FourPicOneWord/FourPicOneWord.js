@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, query, where, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./FourPicOneWord.css";
 
@@ -13,7 +20,7 @@ const FourPicsOneWord = () => {
   const [score, setScore] = useState(0);
   const [gameFinished, setGameFinished] = useState(false);
   const [startTime, setStartTime] = useState(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem("user_id");
   const gameId = 5;
@@ -21,7 +28,7 @@ const FourPicsOneWord = () => {
   const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]]; 
+      [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
   };
@@ -50,7 +57,7 @@ const FourPicsOneWord = () => {
       if (questionsList.length > 0) {
         setCorrectAnswer(questionsList[0].correct_answer);
       }
-      setLoading(false); 
+      setLoading(false);
     };
 
     fetchQuestions();
@@ -63,7 +70,7 @@ const FourPicsOneWord = () => {
 
   const handleLetterChange = (index, value) => {
     const newAnswer = userAnswer.split("");
-    newAnswer[index] = value.slice(-1); 
+    newAnswer[index] = value.slice(-1);
     setUserAnswer(newAnswer.join(""));
   };
 
@@ -100,7 +107,7 @@ const FourPicsOneWord = () => {
 
   const finishGame = async (finalScore) => {
     const endTime = Date.now();
-    const finalTimeTaken = (endTime - startTime) / 1000; 
+    const finalTimeTaken = (endTime - startTime) / 1000;
     await saveUserScore(finalScore, finalTimeTaken);
   };
 
@@ -111,10 +118,14 @@ const FourPicsOneWord = () => {
     const incorrectAnswers = totalQuestions - correctAnswers;
     const difficultyLevel = "medium";
     const dateTime = new Date();
-  
+
     const scoresRef = collection(db, "userScores");
-    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", game_id));
-  
+    const q = query(
+      scoresRef,
+      where("userId", "==", userId),
+      where("game_id", "==", game_id)
+    );
+
     try {
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
@@ -130,7 +141,6 @@ const FourPicsOneWord = () => {
           difficultyLevel,
         });
       } else {
-
         querySnapshot.forEach(async (doc) => {
           if (doc.data().score < correctAnswers) {
             await updateDoc(doc.ref, {
@@ -155,26 +165,37 @@ const FourPicsOneWord = () => {
     setUserAnswer("");
     setScore(0);
     setGameFinished(false);
-    setStartTime(Date.now()); 
+    setStartTime(Date.now());
   };
 
   if (loading) {
-    return <div className="FourPic-question-container">Loading questions...</div>;
+    return (
+      <div className="FourPic-question-container">Loading questions...</div>
+    );
   }
 
   if (questions.length === 0) {
-    return <div className="FourPic-question-container">No questions available For Your Level.</div>;
+    return (
+      <div className="FourPic-question-container">
+        No questions available For Your Level.
+      </div>
+    );
   }
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <div>
-      {gameFinished ? ( 
+      {gameFinished ? (
         <div className="FourPic-game-over">
           <h2>Game Over!</h2>
-          <p>Your final score is: {score}</p>
-          <button onClick={handlePlayAgain} className="FourPic-play-again-button">
+          <p>
+            Your final score is: <span className="FourPic-score">{score}</span>
+          </p>
+          <button
+            onClick={handlePlayAgain}
+            className="FourPic-play-again-button"
+          >
             Play Again
           </button>
         </div>
@@ -184,7 +205,9 @@ const FourPicsOneWord = () => {
             <p className="level">Level {currentQuestionIndex + 1}</p>
           </div>
           <p className="fourPic-score">Score: {score}</p>
-          <h2 className="FourPic-question-text">{currentQuestion.question_text}</h2>
+          <h2 className="FourPic-question-text">
+            {currentQuestion.question_text}
+          </h2>
           <div className="FourPic-images">
             {currentQuestion.image1 && (
               <img
