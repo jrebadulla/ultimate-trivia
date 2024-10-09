@@ -1,10 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 import "./AdminManagement.css";
-import { Modal } from "antd";
+import { Input, Modal } from "antd";
 import { getAuth } from "firebase/auth";
 import { db } from "../../Connection/firebaseConfig";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  
+  CloseCircleOutlined,
+  SearchOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import {
   getStorage,
   ref,
@@ -65,6 +70,36 @@ const Manage = () => {
   const [title, setTitle] = useState("");
   const [tutorialList, setTutorialList] = useState([]);
   const [editingTutorialId, setEditingTutorialId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
+
+  const filteredQuestions = questionList.filter((question) => {
+    const questionTextMatches = question.question_text
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const gameIdMatches = question.game_id
+      .toString()
+      .includes(searchQuery.toLowerCase());
+    return questionTextMatches || gameIdMatches;
+  });
+
+  const pageCount = Math.ceil(filteredQuestions.length / itemsPerPage);
+
+  const paginatedQuestions = filteredQuestions.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(0);
+  };
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -91,11 +126,13 @@ const Manage = () => {
         tutorialSnapshot.docs.map(async (doc) => {
           const data = doc.data();
           const videoRef = ref(storage, data.videoPath);
-          const videoUrl = await getDownloadURL(videoRef); 
+
+          const videoUrl = await getDownloadURL(videoRef);
 
           return {
             id: doc.id,
-            videoUrl, 
+            videoUrl,
+
             title: data.title,
             videoPath: data.videoPath,
           };
@@ -783,9 +820,9 @@ const Manage = () => {
                   <div className="manage-trivia-info">
                     <h4>{trivia.title}</h4>
                     <p>{trivia.description}</p>
-                    <button onClick={() => handleEdit(trivia)}>Edit</button>
+                    <button className="edit-btn" onClick={() => handleEdit(trivia)}>Edit</button>
                     <button
-                      className="delete"
+                      className="delete-btn"
                       onClick={() => handleDelete(trivia.id)}
                     >
                       Delete
@@ -801,18 +838,27 @@ const Manage = () => {
 
         <div className="manage-question-list manage-card">
           <h3>Existing Questions</h3>
-          {questionList.length > 0 ? (
+          <Input
+            type="text"
+            placeholder="Search by question or game ID"
+            value={searchQuery}
+            allowClear
+            onChange={handleSearchChange}
+            className="search-question"
+            prefix={<SearchOutlined />}
+          />
+          {paginatedQuestions.length > 0 ? (
             <ul className="manage-question-items">
-              {questionList.map((question) => (
+              {paginatedQuestions.map((question) => (
                 <li key={question.id} className="manage-question-item">
                   <h4>{question.question_text}</h4>
                   <h3>Game ID: {question.game_id}</h3>
                   <div>
-                    <button onClick={() => handleEditQuestion(question)}>
+                    <button className="edit-btn" onClick={() => handleEditQuestion(question)}>
                       Edit
                     </button>
                     <button
-                      className="delete"
+                      className="delete-btn"
                       onClick={() => handleDeleteQuestion(question.id)}
                     >
                       Delete
@@ -824,7 +870,27 @@ const Manage = () => {
           ) : (
             <p>No questions available.</p>
           )}
+          <ReactPaginate
+            previousLabel={"Previous"}
+            nextLabel={"Next"}
+            breakLabel={"..."}
+            breakClassName={"break-me"}
+            pageCount={pageCount}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageClick}
+            containerClassName={"pagination"}
+            pageClassName={"page-item"}
+            pageLinkClassName={"page-link"}
+            previousClassName={"page-item"}
+            previousLinkClassName={"page-link"}
+            nextClassName={"page-item"}
+            nextLinkClassName={"page-link"}
+            activeClassName={"active"}
+            disabledClassName={"disabled"}
+          />
         </div>
+
         <div className="manage-tutorial-list manage-card">
           <h3>Existing Tutorials</h3>
           {tutorialList.length > 0 ? (
