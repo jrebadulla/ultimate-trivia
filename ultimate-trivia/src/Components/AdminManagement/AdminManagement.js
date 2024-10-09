@@ -126,11 +126,13 @@ const Manage = () => {
         tutorialSnapshot.docs.map(async (doc) => {
           const data = doc.data();
           const videoRef = ref(storage, data.videoPath);
+
           const videoUrl = await getDownloadURL(videoRef);
 
           return {
             id: doc.id,
             videoUrl,
+
             title: data.title,
             videoPath: data.videoPath,
           };

@@ -3,7 +3,7 @@ import "./BubblePop.css";
 import { v4 as uuidv4 } from "uuid";
 import useSound from "use-sound";
 import { db } from "../../../Connection/firebaseConfig";
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, where, updateDoc  } from "firebase/firestore";
 
 const BubblePopQuiz = React.memo(() => {
   const [bubbles, setBubbles] = useState([]);
@@ -31,6 +31,15 @@ const BubblePopQuiz = React.memo(() => {
 
   const scoreSavedRef = useRef(false);
   const saveTimestampRef = useRef(null);
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1)); 
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+  
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -65,7 +74,8 @@ const BubblePopQuiz = React.memo(() => {
           };
         });
 
-        setQuestions(loadedQuestions);
+        const shuffledQuestions = shuffle(loadedQuestions); 
+        setQuestions(shuffledQuestions);
       } catch (error) {
         setError("Failed to fetch questions");
       } finally {
@@ -162,21 +172,40 @@ const BubblePopQuiz = React.memo(() => {
     const timeTaken = 100 - timeLeft;
     const difficultyLevel = "medium";
     const dateTime = new Date();
-
+  
+    const scoresRef = collection(db, "userScores");
+    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", game_id));
+  
     try {
-      await addDoc(collection(db, "userScores"), {
-        userId,
-        game_id,
-        score: correctAnswers,
-        totalQuestions,
-        correctAnswers,
-        incorrectAnswers,
-        dateTime,
-        timeTaken,
-        difficultyLevel,
-      });
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        await addDoc(scoresRef, {
+          userId,
+          game_id,
+          score: correctAnswers,
+          totalQuestions,
+          correctAnswers,
+          incorrectAnswers,
+          dateTime,
+          timeTaken,
+          difficultyLevel,
+        });
+      } else {
+        querySnapshot.forEach(async (doc) => {
+          if (doc.data().score < correctAnswers) { 
+            await updateDoc(doc.ref, {
+              score: correctAnswers,
+              correctAnswers,
+              incorrectAnswers,
+              dateTime,
+              timeTaken,
+              difficultyLevel,
+            });
+          }
+        });
+      }
     } catch (error) {
-      console.error("Error saving score:", error);
+      console.error("Error updating/saving score:", error);
     }
   };
 
@@ -221,13 +250,18 @@ const BubblePopQuiz = React.memo(() => {
           </div>
         </div>
       ) : (
-        <div className="game-over-container">
-          <div className="game-over-header">Game Over!</div>
-          <div className="game-over-score">You Got: {score}</div>
-          <div className="game-over-buttons">
-            <button onClick={restartGame}>Play Again</button>
-          </div>
-        </div>
+        <div className="FourPic-game-over">
+        <h2>Game Over!</h2>
+        <p>
+          Your final score is: <span className="FourPic-score">{score} / {questions.length}</span>
+        </p>
+        <button
+          onClick={restartGame}
+          className="FourPic-play-again-button"
+        >
+          Play Again
+        </button>
+      </div>
       )}
     </div>
   );

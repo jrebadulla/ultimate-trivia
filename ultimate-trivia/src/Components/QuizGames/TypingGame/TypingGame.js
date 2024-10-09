@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, where, updateDoc } from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./TypingGame.css";
 
@@ -129,19 +129,39 @@ const TypingGame = () => {
     const difficultyLevel = "medium";
     const dateTime = new Date();
 
+    const scoresRef = collection(db, "userScores");
+    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", gameId));
+
     try {
-      await addDoc(collection(db, "userScores"), {
-        userId,
-        game_id,
-        score: correctAnswers,
-        totalQuestions,
-        correctAnswers,
-        incorrectAnswers,
-        dateTime,
-        timeTaken: finalTimeTaken,
-        difficultyLevel,
-      });
-      console.log("Score saved successfully");
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        await addDoc(scoresRef, {
+          userId,
+          game_id,
+          score: correctAnswers,
+          totalQuestions,
+          correctAnswers,
+          incorrectAnswers,
+          dateTime,
+          timeTaken: finalTimeTaken,
+          difficultyLevel,
+        });
+        console.log("Score saved successfully");
+      } else {
+        querySnapshot.forEach(async (doc) => {
+          if (doc.data().score < correctAnswers) {
+            await updateDoc(doc.ref, {
+              score: correctAnswers,
+              correctAnswers,
+              incorrectAnswers,
+              dateTime,
+              timeTaken: finalTimeTaken,
+              difficultyLevel,
+            });
+            console.log("Score updated successfully");
+          }
+        });
+      }
     } catch (error) {
       console.error("Error saving score:", error);
     }
@@ -157,10 +177,15 @@ const TypingGame = () => {
 
   return (
     <div>
+      <div>
+      <p className="level">Level {questions.indexOf(currentQuestion) + 1}</p>
+
+      </div>
       <div className="typing-game">
         {!gameFinished ? (
           <>
             <h2>Type the Code Snippet Below</h2>
+
             <pre>{snippet}</pre>
 
             <input
@@ -173,13 +198,18 @@ const TypingGame = () => {
             <div className="timer">Time Left: {timer} seconds</div>
           </>
         ) : (
-          <div className="game-over-container">
-            <div className="game-over-header">Game Over!</div>
-            <div className="game-over-score">Your Score: {userScore}</div>
-            <div className="game-over-buttons">
-              <button onClick={resetGame}>Play Again</button>
-            </div>
-          </div>
+          <div className="FourPic-game-over">
+          <h2>Game Over!</h2>
+          <p>
+            Your final score is: <span className="FourPic-score">{userScore}/{questions.length}</span>
+          </p>
+          <button
+            onClick={resetGame}
+            className="FourPic-play-again-button"
+          >
+            Play Again
+          </button>
+        </div>
         )}
       </div>
     </div>

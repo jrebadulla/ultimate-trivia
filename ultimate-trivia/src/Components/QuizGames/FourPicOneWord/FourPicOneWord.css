@@ -74,13 +74,6 @@
   background: #f5a623;
 }
 
-.FourPic-status-message {
-  font-size: 1.2rem;
-  color: #f5f5f5;
-  margin-top: 20px;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
-}
-
 .correct {
   border-color: #4caf50;
 }
@@ -134,4 +127,107 @@
   height: auto; /* Maintain aspect ratio */
   border: 1px solid #ccc; /* Optional styling */
   border-radius: 8px; /* Optional styling */
+}
+
+.FourPic-game-over-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  animation: fadeIn 1s ease-in-out;
+}
+
+.FourPic-game-over {
+  text-align: center;
+  background: linear-gradient(135deg, #ff6b81, #ff4757);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4); /* More prominent shadow */
+  animation: popIn 0.6s ease-out;
+  transform: scale(0.95);
+}
+
+.FourPic-game-over h2 {
+  font-size: 3rem;
+  color: #ffffff;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+  text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3); /* Added text shadow for depth */
+}
+
+.FourPic-game-over p {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.FourPic-score {
+  font-size: 2.5rem;
+  color: #ffeaa7; /* Gold color for score */
+  font-weight: bold;
+  text-shadow: 1px 3px 5px rgba(0, 0, 0, 0.4);
+}
+
+.FourPic-play-again-button {
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #ff4757;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.FourPic-play-again-button:hover {
+  background-color: #e84118;
+  transform: scale(1.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* More hover depth */
+}
+
+.FourPic-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff6b81;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.FourPic-close-button:hover {
+  background-color: #ff4757;
+  transform: scale(1.1);
+}
+
+.FourPic-close-button:before {
+  content: '✖';
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.6);
+  }
+  to {
+    transform: scale(1);
+  }
 }
