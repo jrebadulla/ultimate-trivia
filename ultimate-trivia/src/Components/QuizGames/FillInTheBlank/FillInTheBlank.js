@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, query, where, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../Connection/firebaseConfig";
 import "./FillInTheBlank.css";
 
@@ -15,6 +22,7 @@ const FillInTheBlank = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const gameId = 3;
+  const gameName = "Java Code Filler"
 
   const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -54,7 +62,7 @@ const FillInTheBlank = () => {
         if (questionsList.length === 0) {
           setError("No questions available for this level.");
         } else {
-          questionsList = shuffle(questionsList); 
+          questionsList = shuffle(questionsList);
           setQuestions(questionsList);
         }
       } catch (fetchError) {
@@ -91,6 +99,7 @@ const FillInTheBlank = () => {
 
   const saveScore = async (score) => {
     const userId = localStorage.getItem("user_id");
+    const level_id = localStorage.getItem("level_id");
     const totalQuestions = questions.length;
     const correctAnswers = score;
     const incorrectAnswers = totalQuestions - correctAnswers;
@@ -99,13 +108,20 @@ const FillInTheBlank = () => {
     const dateTime = new Date();
   
     const scoresRef = collection(db, "userScores");
-    const q = query(scoresRef, where("userId", "==", userId), where("game_id", "==", gameId));
+    const q = query(
+      scoresRef,
+      where("userId", "==", userId),
+      where("game_id", "==", gameId),
+      where("level_id", "==", level_id)
+    );
   
     try {
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
         await addDoc(scoresRef, {
           userId,
+          level_id,
+          game_name: gameName,
           game_id: gameId,
           score: correctAnswers,
           totalQuestions,
@@ -116,18 +132,16 @@ const FillInTheBlank = () => {
           difficultyLevel,
         });
       } else {
-
         querySnapshot.forEach(async (doc) => {
-          if (doc.data().score < correctAnswers) {
-            await updateDoc(doc.ref, {
-              score: correctAnswers,
-              correctAnswers,
-              incorrectAnswers,
-              dateTime,
-              timeTaken,
-              difficultyLevel,
-            });
-          }
+          await updateDoc(doc.ref, {
+            totalQuestions,
+            score: correctAnswers,
+            correctAnswers,
+            incorrectAnswers,
+            dateTime,
+            timeTaken,
+            difficultyLevel,
+          });
         });
       }
       console.log("Score saved/updated successfully");
@@ -171,18 +185,21 @@ const FillInTheBlank = () => {
   return (
     <div>
       {quizFinished ? (
-       <div className="FourPic-game-over">
-       <h2>Game Over!</h2>
-       <p>
-         Your final score is: <span className="FourPic-score">{totalCorrectAnswers} / {questions.length}</span>
-       </p>
-       <button
-         onClick={handlePlayAgain}
-         className="FourPic-play-again-button"
-       >
-         Play Again
-       </button>
-     </div>
+        <div className="FourPic-game-over">
+          <h2>Game Over!</h2>
+          <p>
+            Your final score is:{" "}
+            <span className="FourPic-score">
+              {totalCorrectAnswers} / {questions.length}
+            </span>
+          </p>
+          <button
+            onClick={handlePlayAgain}
+            className="FourPic-play-again-button"
+          >
+            Play Again
+          </button>
+        </div>
       ) : (
         <div>
           <p className="level">Level {currentQuestionIndex + 1}</p>
