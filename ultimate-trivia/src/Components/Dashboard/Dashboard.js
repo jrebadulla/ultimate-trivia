@@ -8,6 +8,7 @@ import Compiler from "../Compiler/Compiler";
 import Trivia from "../Trivia/Trivia";
 import Manage from "../AdminManagement/AdminManagement";
 import UserStatistics from "../Statistics/Statistics";
+import ActiveComponentContext from "./ActiveComponentContext";
 
 const DashboardLayout = () => {
   const [firstname, setFirstname] = useState("");
@@ -229,6 +230,7 @@ const DashboardLayout = () => {
           )}
         </div>
       </div>
+      <ActiveComponentContext.Provider value={{ activeComponent, setActiveComponent }}>
       <div className="content">
         {activeComponent === "tutorial" && <Tutorials />}
         {activeComponent === "quiz" && <QuizDashboard />}
@@ -237,6 +239,7 @@ const DashboardLayout = () => {
         {activeComponent === "statistics" && <UserStatistics />}
         {activeComponent === "manage" && <Manage userRole={userRole} />}
       </div>
+      </ActiveComponentContext.Provider>
     </div>
   );
 };
