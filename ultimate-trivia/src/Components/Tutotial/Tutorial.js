@@ -2,7 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { db } from "../../Connection/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { getStorage, getDownloadURL, ref } from "firebase/storage";
+import { Input } from "antd"; 
 import "./Tutorial.css";
+
+const { Search } = Input; 
 
 const Tutorials = () => {
   const videoRefs = useRef([]);
@@ -10,6 +13,7 @@ const Tutorials = () => {
   const [isPlaying, setIsPlaying] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [durations, setDurations] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); 
   const storage = getStorage();
 
   useEffect(() => {
@@ -65,6 +69,10 @@ const Tutorials = () => {
     setDurations(updatedDurations);
   };
 
+  const filteredVideos = videos.filter((video) =>
+    video.title.toLowerCase().includes(searchQuery.toLowerCase()) 
+  );
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -91,7 +99,18 @@ const Tutorials = () => {
 
   return (
     <div className="tutorial-container">
-      <h1>Tutorials</h1>
+      <div className="fixed-tutorial-header">
+        <h1>Tutorials</h1>
+        <Search
+          placeholder="Search tutorials"
+          enterButton
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+          allowClear
+        />
+      </div>
+
       {isLoading && (
         <div className="video-container">
           {Array(4)
@@ -103,7 +122,7 @@ const Tutorials = () => {
       )}
 
       <div className="video-container">
-        {videos.map((video, index) => (
+        {filteredVideos.map((video, index) => (
           <div className="video-item" key={video.id}>
             <div className="video-wrapper">
               <video
