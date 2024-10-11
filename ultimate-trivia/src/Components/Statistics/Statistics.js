@@ -37,6 +37,7 @@ const UserStatistics = () => {
   const { setActiveComponent } = useContext(ActiveComponentContext);
   const [chartData, setChartData] = useState({});
   const [timeData, setTimeData] = useState({});
+  const [timeTakenData, setTimeTakenData] = useState({});
   const [suggestions, setSuggestions] = useState([]);
   const [noData, setNoData] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +95,7 @@ const UserStatistics = () => {
     const labels = data.map((item) => `${item.game_name}`);
     const correctAnswers = data.map((item) => item.correctAnswers);
     const incorrectAnswers = data.map((item) => item.incorrectAnswers);
-    const times = data.map((item) => (item.timeTaken / 60).toFixed(2));
+    const times = data.map((item) => (item.timeTaken / 60).toFixed(2)); // Time taken in minutes
 
     setChartData({
       labels,
@@ -116,7 +117,8 @@ const UserStatistics = () => {
       ],
     });
 
-    setTimeData({
+    // Set time taken data for a new line chart
+    setTimeTakenData({
       labels,
       datasets: [
         {
@@ -283,8 +285,8 @@ const UserStatistics = () => {
             borderRadius: "8px",
           }}
         >
-          {timeData && timeData.datasets && (
-            <Line data={timeData} options={lineOptions} />
+          {timeTakenData && timeTakenData.datasets && (
+            <Line data={timeTakenData} options={lineOptions} />
           )}
         </div>
       </div>
@@ -302,14 +304,29 @@ const UserStatistics = () => {
         >
           Performance Suggestions
         </h2>
-        <ul style={{ listStyle: "none", padding: 0, textAlign: "center" }}>
+        <ul style={{ listStyle: "none", padding: 0 }}>
           {suggestions.map((suggestion, index) => (
-            <li key={index} style={{ color: "white", marginBottom: "10px" }}>
+            <li
+              key={index}
+              style={{
+                marginBottom: "10px",
+                backgroundColor: "#333",
+                padding: "10px",
+                borderRadius: "5px",
+              }}
+            >
               <span
-                className={`icon-${suggestion.icon}`}
-                style={{ marginRight: "8px" }}
-              ></span>
-              {suggestion.text}
+                style={{
+                  color:
+                    suggestion.icon === "success"
+                      ? "green"
+                      : suggestion.icon === "warning"
+                      ? "orange"
+                      : "red",
+                }}
+              >
+                {suggestion.text}
+              </span>
             </li>
           ))}
         </ul>
