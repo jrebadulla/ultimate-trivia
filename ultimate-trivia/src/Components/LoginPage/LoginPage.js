@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./LoginPage.css";
-import { message, Modal } from "antd";
+import { message, Modal, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import Logo from "../Image/trivia-logo.png";
 import { auth } from "../../Connection/firebaseConfig";
@@ -9,7 +9,15 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  collection,
+} from "firebase/firestore";
 import { db } from "../../Connection/firebaseConfig";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -30,6 +38,13 @@ const LoginPage = () => {
 
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [emailForReset, setEmailForReset] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loadingSignIn, setLoadingSignIn] = useState(false);
+  const [loadingSignUp, setLoadingSignUp] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
 
   const navigate = useNavigate();
 
@@ -78,6 +93,7 @@ const LoginPage = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setLoadingSignUp(true);
     const {
       email,
       password,
@@ -123,7 +139,7 @@ const LoginPage = () => {
         profile_picture_url: profilePicUrl,
         createdAt: new Date(),
       });
-
+      setLoadingSignUp(false);
       message.success("Sign up successful!");
     } catch (error) {
       console.error(error);
@@ -133,10 +149,33 @@ const LoginPage = () => {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+    setLoadingSignIn(true);
     try {
+      let emailOrUsername = username;
+      let emailToUse = emailOrUsername;
+
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername);
+
+      if (!isEmail) {
+        const userQuerySnapshot = await getDocs(
+          query(
+            collection(db, "users"),
+            where("username", "==", emailOrUsername)
+          )
+        );
+
+        if (!userQuerySnapshot.empty) {
+          const userDoc = userQuerySnapshot.docs[0];
+          emailToUse = userDoc.data().email;
+        } else {
+          message.error("Username not found.");
+          return;
+        }
+      }
+
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        username,
+        emailToUse,
         password
       );
       const user = userCredential.user;
@@ -152,13 +191,12 @@ const LoginPage = () => {
         localStorage.setItem("user_id", userData.user_id);
         localStorage.setItem("role", userData.role);
         localStorage.setItem("level_id", userData.level_id);
-        localStorage.setItem("level_id", userData.level_id);
-
         if (userData.profile_picture_url) {
           localStorage.setItem("profile_picture", userData.profile_picture_url);
         } else {
           localStorage.removeItem("profile_picture");
         }
+        setLoadingSignIn(false);
         navigate("/dashboard");
       } else {
         message.error("No additional user details found.");
@@ -200,140 +238,159 @@ const LoginPage = () => {
 
   return (
     <div className="main-container">
-      <div className={`container ${isActive ? "active" : ""}`} id="container">
-        <div className="form-container sign-up">
-          <form>
-            <br></br>
-            <div className="social-icons">
-              <a href="#" className="icon"></a>
-            </div>
-            <input
-              type="text"
-              placeholder="First Name"
-              name="firstname"
-              value={formData.firstname}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              name="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            <select
-              name="level_id"
-              value={formData.level_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Your Year Level</option>
-              <option value="1">First Year</option>
-              <option value="2">Second Year</option>
-              <option value="3">Third Year</option>
-              <option value="4">Fourth Year</option>
-            </select>
-            <label className="upload-btn" htmlFor="file-upload">
-              Upload Profile Picture
-            </label>
-            <input
-              type="file"
-              id="file-upload"
-              name="profile_picture"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="upload-preview"
+      <Spin spinning={loadingSignIn || loadingSignUp}>
+        <div className={`container ${isActive ? "active" : ""}`} id="container">
+          <div className="form-container sign-up">
+            <form>
+              <br></br>
+              <div className="social-icons">
+                <a href="#" className="icon"></a>
+              </div>
+              <input
+                type="text"
+                placeholder="First Name"
+                name="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                required
               />
-            )}
-            <button onClick={handleSignUp}>Sign Up</button>
-          </form>
-        </div>
-        <div className="form-container sign-in">
-          <form>
-            <h1>Sign In</h1>
-            <br></br>
-            <div className="social-icons">
-              <a href="#" className="icon"></a>
-            </div>
-            <input
-              type="email"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Email"
-              required
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              required
-            />
-            <a href="#" onClick={showResetModal}>
-              Forget Your Password?
-            </a>
-            <button onClick={handleSignIn}>Login</button>
-          </form>
-        </div>
-        <div className="toggle-container">
-          <div className="toggle">
-            <div className="toggle-panel toggle-left">
-              <img src={Logo} alt="logo" />
-              <h1>Welcome Back!</h1>
-              <p>Enter your personal details to use all the site features </p>
-              <button className="hidden" id="login" onClick={handleClick}>
-                Sign In
-              </button>
-            </div>
-            <div className="toggle-panel toggle-right">
-              <img src={Logo} alt="logo" />
-              <h1>Welcome, To Ultimate Trivia!</h1>
-              <p>
-                Register with your personal details to use all the site features{" "}
-              </p>
-              <button
-                className="hidden"
-                id="register"
-                onClick={handleRegisterClick}
+              <input
+                type="text"
+                placeholder="Last Name"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <span
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? "👁️" : "🙈"}
+                </span>
+              </div>
+              <select
+                name="level_id"
+                value={formData.level_id}
+                onChange={handleChange}
+                required
               >
-                Sign Up
-              </button>
+                <option value="">Select Your Year Level</option>
+                <option value="1">First Year</option>
+                <option value="2">Second Year</option>
+                <option value="3">Third Year</option>
+                <option value="4">Fourth Year</option>
+              </select>
+              <label className="upload-btn" htmlFor="file-upload">
+                Upload Profile Picture
+              </label>
+              <input
+                type="file"
+                id="file-upload"
+                name="profile_picture"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="upload-preview"
+                />
+              )}
+              <button onClick={handleSignUp}>Sign Up</button>
+            </form>
+          </div>
+          <div className="form-container sign-in">
+            <form>
+              <h1>Sign In</h1>
+              <br></br>
+              <div className="social-icons">
+                <a href="#" className="icon"></a>
+              </div>
+              <input
+                type="email"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Email or Username"
+                required
+              />
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  required
+                />
+                <span
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? "👁️" : "🙈"}
+                </span>
+              </div>
+
+              <a className="forget-pass" href="#" onClick={showResetModal}>
+                Forget Your Password?
+              </a>
+              <button onClick={handleSignIn}>Login</button>
+            </form>
+          </div>
+          <div className="toggle-container">
+            <div className="toggle">
+              <div className="toggle-panel toggle-left">
+                <img src={Logo} alt="logo" />
+                <h1>Welcome Back!</h1>
+                <p>Enter your personal details to use all the site features </p>
+                <button className="hidden" id="login" onClick={handleClick}>
+                  Sign In
+                </button>
+              </div>
+              <div className="toggle-panel toggle-right">
+                <img src={Logo} alt="logo" />
+                <h1>Welcome, To Ultimate Trivia!</h1>
+                <p>
+                  Register with your personal details to use all the site
+                  features{" "}
+                </p>
+                <button
+                  className="hidden"
+                  id="register"
+                  onClick={handleRegisterClick}
+                >
+                  Sign Up
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
+      </Spin>
       <Modal
         title="Reset Your Password"
         visible={isResetModalVisible}
