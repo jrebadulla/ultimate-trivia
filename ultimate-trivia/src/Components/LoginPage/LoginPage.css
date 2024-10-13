@@ -59,9 +59,17 @@
   cursor: pointer;
 }
 
+.container button:hover {
+  background-color: #0074d9;
+}
+
 .container button.hidden {
-  background-color: transparent;
-  border-color: #fff;
+  background-color: #0074d9;
+}
+
+.container button.hidden:hover {
+  background-color: white;
+  color: black;
 }
 
 .container form {
@@ -230,7 +238,7 @@ input[type="file"] {
 }
 
 .upload-btn:hover {
-  background-color: #0074D9; 
+  background-color: #0074d9;
 }
 
 .upload-preview {
@@ -241,3 +249,28 @@ input[type="file"] {
   border-radius: 10px;
   display: none;
 }
+
+.forget-pass:hover {
+  color: #0074d9;
+  text-decoration: underline;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  width: 100%;
+  padding-right: 40px; 
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px; 
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 20px;
+}
+
