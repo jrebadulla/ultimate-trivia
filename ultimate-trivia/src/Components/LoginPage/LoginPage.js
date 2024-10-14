@@ -229,7 +229,7 @@ const LoginPage = () => {
       message.error(
         "Login failed. Please check your credentials and try again."
       );
-      console.error(error.message);
+      setLoadingSignIn(false);
     }
   };
 
