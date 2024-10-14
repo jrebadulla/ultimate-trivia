@@ -8,7 +8,26 @@ import FourPicsOneWord from "../FourPicOneWord/FourPicOneWord";
 
 const QuizDashboard = () => {
   const [activeQuiz, setActiveQuiz] = useState(null);
-  const audioRef = useRef(null); 
+  const audioRef = useRef(null);
+  const levelId = localStorage.getItem("level_id");
+
+  let yearMessage;
+  switch (levelId) {
+    case "1":
+      yearMessage = "You're answering a First Year question.";
+      break;
+    case "2":
+      yearMessage = "You're answering a Second Year question.";
+      break;
+    case "3":
+      yearMessage = "You're answering a Third Year question.";
+      break;
+    case "4":
+      yearMessage = "You're answering a Fourth Year question.";
+      break;
+    default:
+      yearMessage = "Invalid level. Please select a valid year.";
+  }
 
   useEffect(() => {
     createParticles();
@@ -21,10 +40,10 @@ const QuizDashboard = () => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.currentTime = 0; 
+        audioRef.current.currentTime = 0;
       }
     };
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (activeQuiz) {
@@ -38,7 +57,7 @@ const QuizDashboard = () => {
         });
       }
     }
-  }, [activeQuiz]); 
+  }, [activeQuiz]);
 
   const createParticles = () => {
     const container = document.querySelector(".particles");
@@ -88,6 +107,7 @@ const QuizDashboard = () => {
             ×
           </button>
           <div className="modal-header">{activeQuiz}</div>
+          <p className="info-message">{yearMessage}</p>
           <div className="modal-debug">
             {activeQuiz === "Bubble Pop Quiz" ? (
               <BubblePopQuiz />

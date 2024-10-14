@@ -1,5 +1,7 @@
 .question-container {
   text-align: center;
+  width: 100%;
+  padding: 10px;
 }
 
 .question-title {
@@ -15,6 +17,7 @@
 .options {
   display: flex;
   flex-direction: column;
+  width: 100%;
   gap: 10px;
 }
 

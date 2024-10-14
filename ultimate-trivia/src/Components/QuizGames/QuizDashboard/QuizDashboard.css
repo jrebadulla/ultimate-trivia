@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap&font-display=swap");
 
 .quiz-container {
   display: flex;
@@ -56,7 +56,7 @@
 
 .quizes-container div {
   width: 100%;
-  height: 120px; 
+  height: 120px;
   background: linear-gradient(145deg, #1c2b47, #2e3e5c);
   padding: 20px;
   border-radius: 15px;
@@ -66,7 +66,8 @@
   text-transform: uppercase;
   text-align: center;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease,
+    background-color 0.3s ease, filter 0.3s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -74,15 +75,29 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: "Press Start 2P", cursive;
+  will-change: transform, box-shadow;
 }
 
 .quizes-container div:hover {
-  transform: scale(1.08) rotate(2deg);
+  transform: scale(1.08) rotate(3deg);
   background: linear-gradient(145deg, #2e3e5c, #3e506d);
   filter: drop-shadow(0 0 10px #ffdd57);
   border-color: #ffdd57;
-  box-shadow: 0 12px 24px rgba(255, 109, 109, 0.7);
+  box-shadow: 0 15px 30px rgba(255, 203, 5, 0.4);
   text-shadow: 2px 2px #ffdd57;
+}
+
+@media (min-width: 1400px) {
+  .quizes-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.quizes-container div:focus {
+  outline: none;
+  border-color: #ffdd57;
+  box-shadow: 0 0 0 3px rgba(255, 221, 87, 0.75);
 }
 
 @media (max-width: 768px) {
@@ -111,11 +126,11 @@
 
 @media (min-width: 1200px) {
   .quiz-container {
-    min-height: 89vh; 
+    min-height: 89vh;
   }
 
   .quizes-container {
-    max-width: 800px; 
+    max-width: 800px;
   }
 }
 
@@ -124,8 +139,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  max-width: 90vw;
-  max-height: 90vh;
+  width: auto;
+  max-width: 100vw;
+  max-height: 100vh;
   background: linear-gradient(135deg, #1c2b47, #3b4d71);
   color: #ffffff;
   border-radius: 15px;
@@ -153,11 +169,21 @@
 }
 
 .modal-header {
-  font-size: 2.2rem;
+  font-size: 1.5rem;
   text-align: center;
   color: #ffdd57;
-  text-shadow: 2px 2px #ff6b6b, 4px 4px #ffdd57;
-  padding-top: 30px;
+  text-shadow: 2px 2px #ff6b6b, 1px 1px #ffdd57;
+  margin-bottom: 15px;
+}
+
+.modal-debug {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  max-height: 80vh;
 }
 
 .close-button {
@@ -177,4 +203,15 @@
 .close-button:hover {
   background-color: #e63946;
   transform: scale(1.1);
+}
+
+.info-message {
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #00b4d8;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

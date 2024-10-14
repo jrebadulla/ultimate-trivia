@@ -210,7 +210,6 @@ const FourPicsOneWord = () => {
           <div>
             <p className="level">Level {currentQuestionIndex + 1}</p>
           </div>
-          <p className="fourPic-score">Score: {score}</p>
           <h2 className="FourPic-question-text">
             {currentQuestion.question_text}
           </h2>

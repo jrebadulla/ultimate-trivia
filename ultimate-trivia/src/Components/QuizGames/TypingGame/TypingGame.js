@@ -205,7 +205,7 @@ const TypingGame = () => {
               placeholder="Start typing..."
               className="input-field"
             />
-            <div className="timer">Time Left: {timer} seconds</div>
+            <div className="timer-typing">Time Left: {timer} seconds</div>
           </>
         ) : (
           <div className="FourPic-game-over">

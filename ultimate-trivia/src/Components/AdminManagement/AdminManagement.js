@@ -5,7 +5,6 @@ import { Input, Modal } from "antd";
 import { getAuth } from "firebase/auth";
 import { db } from "../../Connection/firebaseConfig";
 import {
-  
   CloseCircleOutlined,
   SearchOutlined,
   UploadOutlined,
@@ -535,7 +534,9 @@ const Manage = () => {
             <div className="manage-modal-overlay" onClick={handleCancel}></div>
             <div className="manage-modal">
               <form className="manage-trivia-form" onSubmit={handleSubmit}>
-                <label htmlFor="image">Upload Image:</label>
+                <label htmlFor="image" className="upload-label">
+                  Upload image for your trivia Trivia:
+                </label>
                 <input
                   type="file"
                   accept="image/*"
@@ -623,7 +624,10 @@ const Manage = () => {
                   required
                   id="game_id"
                 />
-                <label htmlFor="question_text">Question Text:</label>
+                <label htmlFor="question_text">
+                  {" "}
+                  Enter your question (max 130 characters):
+                </label>
                 <input
                   type="text"
                   name="question_text"
@@ -631,6 +635,7 @@ const Manage = () => {
                   onChange={handleQuestionInputChange}
                   required
                   id="question_text"
+                  maxLength={130}
                 />
                 <label htmlFor="level_id">Required Student Level:</label>
                 <input
@@ -641,7 +646,10 @@ const Manage = () => {
                   required
                   id="level_id"
                 />
-                <label htmlFor="option_a">Option A:</label>
+                <label htmlFor="option_a">
+                  {" "}
+                  Enter Option A (for Multiple Choice):
+                </label>
                 <input
                   type="text"
                   name="option_a"
@@ -650,7 +658,10 @@ const Manage = () => {
                   id="option_a"
                 />
 
-                <label htmlFor="option_b">Option B:</label>
+                <label htmlFor="option_b">
+                  {" "}
+                  Enter Option B (for Multiple Choice):
+                </label>
                 <input
                   type="text"
                   name="option_b"
@@ -659,7 +670,10 @@ const Manage = () => {
                   id="option_b"
                 />
 
-                <label htmlFor="option_c">Option C:</label>
+                <label htmlFor="option_c">
+                  {" "}
+                  Enter Option C (for Multiple Choice):
+                </label>
                 <input
                   type="text"
                   name="option_c"
@@ -668,7 +682,10 @@ const Manage = () => {
                   id="option_c"
                 />
 
-                <label htmlFor="option_d">Option D:</label>
+                <label htmlFor="option_d">
+                  {" "}
+                  Enter Option A (for Multiple Choice):
+                </label>
                 <input
                   type="text"
                   name="option_d"
@@ -686,7 +703,9 @@ const Manage = () => {
                   required
                   id="correct_answer"
                 />
-                <label htmlFor="image1">Upload Picture 1:</label>
+                <label htmlFor="image1" className="upload-label">
+                  Upload Image 1 (for Four Pics, One Word)
+                </label>
                 <input
                   id="image1"
                   type="file"
@@ -701,7 +720,9 @@ const Manage = () => {
                     width={100}
                   />
                 )}
-                <label htmlFor="image2">Upload Picture 2:</label>
+                <label htmlFor="image2" className="upload-label">
+                  Upload Image 2 (for Four Pics, One Word)
+                </label>
                 <input
                   id="image2"
                   type="file"
@@ -715,7 +736,9 @@ const Manage = () => {
                     width={100}
                   />
                 )}
-                <label htmlFor="image3">Upload Picture 3:</label>
+                <label htmlFor="image3" className="upload-label">
+                  Upload Image 3 (for Four Pics, One Word)
+                </label>
                 <input
                   id="image3"
                   type="file"
@@ -729,7 +752,9 @@ const Manage = () => {
                     width={100}
                   />
                 )}
-                <label htmlFor="image4">Upload Picture 4:</label>
+                <label htmlFor="image4" className="upload-label">
+                  Upload Image 4 (for Four Pics, One Word)
+                </label>
                 <input
                   id="image4"
                   type="file"
@@ -767,7 +792,7 @@ const Manage = () => {
               <p className="text">Upload Tutorial Video</p>
               <input
                 className="title-toturial"
-                placeholder="Video Title"
+                placeholder="Enter title for your tutorial video"
                 id="video-title"
                 type="text"
                 value={title}
@@ -775,7 +800,7 @@ const Manage = () => {
               />
               <div className="upload-input">
                 <label htmlFor="tutorial">
-                  Select Video <UploadOutlined className="outlined" />
+                  Select Video Tutorial <UploadOutlined className="outlined" />
                 </label>
                 <input
                   className="upload-vid"
@@ -820,7 +845,12 @@ const Manage = () => {
                   <div className="manage-trivia-info">
                     <h4>{trivia.title}</h4>
                     <p>{trivia.description}</p>
-                    <button className="edit-btn" onClick={() => handleEdit(trivia)}>Edit</button>
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEdit(trivia)}
+                    >
+                      Edit
+                    </button>
                     <button
                       className="delete-btn"
                       onClick={() => handleDelete(trivia.id)}
@@ -854,7 +884,10 @@ const Manage = () => {
                   <h4>{question.question_text}</h4>
                   <h3>Game ID: {question.game_id}</h3>
                   <div>
-                    <button className="edit-btn" onClick={() => handleEditQuestion(question)}>
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEditQuestion(question)}
+                    >
                       Edit
                     </button>
                     <button
