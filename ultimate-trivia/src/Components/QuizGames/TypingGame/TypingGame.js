@@ -66,7 +66,9 @@ const TypingGame = () => {
       }, 1000);
     } else if (timer === 0) {
       setGameFinished(true);
-      saveUserScore(calculateScore());
+      const finalScore = calculateScore();
+      setUserScore(finalScore);
+      saveUserScore(finalScore, 60 - timer);
     }
 
     return () => clearInterval(interval);
@@ -79,6 +81,7 @@ const TypingGame = () => {
       setStartTime(Date.now());
     }
 
+    // Calculate accuracy based on correct characters typed
     const matchingChars = value
       .split("")
       .filter((char, i) => char === snippet[i]).length;
@@ -93,10 +96,14 @@ const TypingGame = () => {
       setEndTime(endTimeValue);
       setTimeTaken(timeSpent);
 
+      // Set score based on calculated accuracy
       const calculatedScore = Math.round(calculatedAccuracy);
       setUserScore(calculatedScore);
+
+      // Save the score and time taken
       saveUserScore(calculatedScore, timeSpent);
 
+      // Proceed to the next question or finish the game
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
         setSnippet(questions[currentQuestionIndex + 1].question_text);
@@ -123,7 +130,11 @@ const TypingGame = () => {
   };
 
   const calculateScore = () => {
-    return accuracy ? Math.round(accuracy) : 0;
+    const matchingChars = userInput
+      .split("")
+      .filter((char, i) => char === snippet[i]).length;
+    const calculatedAccuracy = (matchingChars / snippet.length) * 100;
+    return Math.round(calculatedAccuracy);
   };
 
   const saveUserScore = async (calculatedScore, finalTimeTaken) => {
@@ -131,7 +142,7 @@ const TypingGame = () => {
     const level_id = localStorage.getItem("level_id");
     const game_id = gameId;
     const totalQuestions = questions.length;
-    const correctAnswers = calculatedScore;
+    const correctAnswers = Math.round(calculatedScore);
     const incorrectAnswers = totalQuestions - correctAnswers;
     const difficultyLevel = "medium";
     const dateTime = new Date();
@@ -213,7 +224,7 @@ const TypingGame = () => {
             <p>
               Your final score is:{" "}
               <span className="FourPic-score">
-                {userScore}/{questions.length}
+                {userScore}
               </span>
             </p>
             <button onClick={resetGame} className="FourPic-play-again-button">
