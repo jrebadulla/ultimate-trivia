@@ -140,10 +140,29 @@ const LoginPage = () => {
         createdAt: new Date(),
       });
       setLoadingSignUp(false);
-      message.success("Sign up successful!");
+      message.success({
+        content: "Sign up successful! 🎉 You can now sign in to your account.",
+        duration: 3,
+      });
     } catch (error) {
       console.error(error);
-      message.error("Error during signup: " + error.message);
+      const errorMsg =
+        error.message || "An unexpected error occurred during signup.";
+
+      if (error.response && error.response.status === 400) {
+        message.error(
+          "Sign up failed: Invalid information. Please check your details and try again."
+        );
+      } else if (error.response && error.response.status === 500) {
+        message.error(
+          "Server error: We're experiencing issues right now. Please try again later."
+        );
+      } else {
+        message.error(
+          `Sign up failed: ${errorMsg}. Please try again or contact support if the issue persists.`
+        );
+      }
+      setLoadingSignUp(false);
     }
   };
 
@@ -168,7 +187,12 @@ const LoginPage = () => {
           const userDoc = userQuerySnapshot.docs[0];
           emailToUse = userDoc.data().email;
         } else {
-          message.error("Username not found.");
+          message.error({
+            content:
+              "Username or Email not found. Please check your username or sign up for a new account.",
+            duration: 3,
+          });
+          setLoadingSignIn(false);
           return;
         }
       }

@@ -36,7 +36,7 @@
     grid-auto-flow: column; 
     justify-content: center;
     align-items: center; 
-    gap: 20px; 
+    gap: 15px; 
     height: 40vh; 
     width: 100%; 
     margin: 0 auto; 
@@ -47,7 +47,6 @@
   text-align: center;
   color: #ffdd57;
   text-shadow: 2px 2px #ff6b6b;
-  padding: 10px;
 }
   
   .bubble {
@@ -66,7 +65,7 @@
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
     cursor: pointer;
     padding: 10px;
-    margin: 20px; 
+    margin: 10px; 
   }
   
   .bubble:hover {
@@ -84,10 +83,12 @@
   }
   
   .current-question {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #ffffff;
     text-align: center;
+    word-wrap: break-word; 
+    margin-bottom: 15px;
   }
   
   .bubble.pop {

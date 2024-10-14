@@ -295,7 +295,8 @@
   background-color: #263c6d;
   border-radius: 5px;
   color: white;
-  font-size: 18px;
+  font-size: 16px;
+  text-align: center;
   margin-top: 10px;
   transition: background-color 0.3s;
   height: 30px;
@@ -471,3 +472,26 @@
   border-color: #1890ff;
   box-shadow: 0 0 10px rgba(24, 144, 255, 0.2);
 }
+
+.upload-label {
+  font-weight: bold;
+  color: #333;
+  font-size: 16px;
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: fit-content;
+  
+}
+
+.upload-label:hover {
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+}
+

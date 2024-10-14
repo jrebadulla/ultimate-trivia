@@ -143,6 +143,7 @@ const Tutorials = () => {
                   className="play-btn"
                   aria-label="Play video"
                   onClick={() => handlePlay(index)}
+                  aria-keyshortcuts="Space" 
                 >
                   ▶
                 </button>
