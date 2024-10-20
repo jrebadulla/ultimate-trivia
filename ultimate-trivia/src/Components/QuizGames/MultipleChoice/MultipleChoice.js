@@ -19,7 +19,11 @@ const MultipleChoice = () => {
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(true);
   const gameId = 2;
-  const gameName = "Code Choice Python";
+  const gameName = "Multiple Choice";
+
+  const correctSound = new Audio('/sounds/correct.mp3');
+  const incorrectSound = new Audio('/sounds/wrong.mp3');
+  const gameOverSound = new Audio('/sounds/game-over.mp3');
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -86,7 +90,10 @@ const MultipleChoice = () => {
     const isCorrect = answer === currentQuestion.correct_answer;
 
     if (isCorrect) {
+      correctSound.play();
       setTotalCorrectAnswers((prev) => prev + 1);
+    } else {
+      incorrectSound.play();
     }
 
     if (currentQuestionIndex + 1 < questions.length) {
@@ -94,6 +101,7 @@ const MultipleChoice = () => {
     } else {
       setQuizFinished(true);
       saveScore(totalCorrectAnswers + (isCorrect ? 1 : 0));
+      gameOverSound.play();
     }
   };
 

@@ -24,7 +24,11 @@ const FourPicsOneWord = () => {
 
   const userId = localStorage.getItem("user_id");
   const gameId = 5;
-  const gameName = "Pic Code Challenge"
+  const gameName = "Four Pics One Word";
+
+  const correctSound = new Audio("/sounds/correct.mp3");
+  const incorrectSound = new Audio("/sounds/wrong.mp3");
+  const gameOverSound = new Audio("/sounds/game-over.mp3");
 
   const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -86,6 +90,7 @@ const FourPicsOneWord = () => {
       const newScore = score + 1;
       setScore(newScore);
       setShowScore(true);
+      correctSound.play();
 
       setTimeout(async () => {
         if (currentQuestionIndex + 1 < questions.length) {
@@ -103,6 +108,7 @@ const FourPicsOneWord = () => {
     } else {
       setInputClass("incorrect");
       setShowScore(true);
+      incorrectSound.play();
     }
   };
 
@@ -110,6 +116,7 @@ const FourPicsOneWord = () => {
     const endTime = Date.now();
     const finalTimeTaken = (endTime - startTime) / 1000;
     await saveUserScore(finalScore, finalTimeTaken);
+    gameOverSound.play();
   };
 
   const saveUserScore = async (calculatedScore, finalTimeTaken) => {

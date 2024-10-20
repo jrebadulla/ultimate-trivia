@@ -90,7 +90,7 @@ const QuizDashboard = () => {
           Multiple Choice
         </div>
         <div onClick={() => handleQuizClick("Fill in the Blanks")}>
-          Fill in the Blanks
+          Fill In The Blank
         </div>
         <div onClick={() => handleQuizClick("Bubble Pop Quiz")}>Bubble Pop</div>
         <div onClick={() => handleQuizClick("Four Pics One Word")}>

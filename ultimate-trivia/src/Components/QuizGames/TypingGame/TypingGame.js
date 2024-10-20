@@ -25,7 +25,7 @@ const TypingGame = () => {
   const [gameStatus, setGameStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const gameId = 4;
-  const gameName = "Sql Type Master";
+  const gameName = "Typing";
 
   useEffect(() => {
     const fetchQuestions = async () => {

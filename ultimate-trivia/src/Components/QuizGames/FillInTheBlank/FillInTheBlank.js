@@ -22,7 +22,11 @@ const FillInTheBlank = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const gameId = 3;
-  const gameName = "Java Code Filler"
+  const gameName = "Fill In The Blank"
+
+  const correctSound = new Audio("/sounds/correct.mp3");
+  const wrongSound = new Audio("/sounds/wrong.mp3");
+  const gameoverSound = new Audio("/sounds/game-over.mp3");
 
   const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -84,7 +88,10 @@ const FillInTheBlank = () => {
       currentQuestion.correct_answer.toLowerCase();
 
     if (isCorrect) {
+      correctSound.play(); 
       setTotalCorrectAnswers((prev) => prev + 1);
+    } else {
+      wrongSound.play(); 
     }
 
     setCurrentAnswer("");
@@ -94,6 +101,7 @@ const FillInTheBlank = () => {
     } else {
       setEndTime(new Date());
       setQuizFinished(true);
+      gameoverSound.play(); 
     }
   };
 
