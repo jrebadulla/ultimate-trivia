@@ -87,18 +87,16 @@ const QuizDashboard = () => {
       <div className="particles"></div>
       <div className="quizes-container">
         <div onClick={() => handleQuizClick("Multiple Choice")}>
-          CodeChoice Python
+          Multiple Choice
         </div>
         <div onClick={() => handleQuizClick("Fill in the Blanks")}>
-          Java Code Filler
+          Fill in the Blanks
         </div>
-        <div onClick={() => handleQuizClick("Bubble Pop Quiz")}>
-          BubbleScript Challenge
-        </div>
+        <div onClick={() => handleQuizClick("Bubble Pop Quiz")}>Bubble Pop</div>
         <div onClick={() => handleQuizClick("Four Pics One Word")}>
-          PicCode Challenge
+          Four Pics One Word
         </div>
-        <div onClick={() => handleQuizClick("Typing Game")}>SQL TypeMaster</div>
+        <div onClick={() => handleQuizClick("Typing Game")}>Typing</div>
       </div>
 
       {activeQuiz && (

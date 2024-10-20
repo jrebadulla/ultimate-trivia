@@ -633,7 +633,6 @@ const Manage = () => {
                   name="question_text"
                   value={questionData.question_text}
                   onChange={handleQuestionInputChange}
-                  required
                   id="question_text"
                   maxLength={130}
                 />

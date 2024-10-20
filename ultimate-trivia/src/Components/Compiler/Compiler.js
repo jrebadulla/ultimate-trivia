@@ -8,6 +8,7 @@ import {
   Text,
   theme,
 } from "@chakra-ui/react";
+import "./Compiler.css";
 import MonacoEditor from "@monaco-editor/react";
 import { executeCode } from "./Api";
 import { LANGUAGE_VERSIONS, CODE_SNIPPETS } from "./Constant.js";
@@ -33,7 +34,7 @@ const Compiler = () => {
   const [error, setError] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [timeSpent, setTimeSpent] = useState(0); 
+  const [timeSpent, setTimeSpent] = useState(0);
   const [practiceMessageVisible, setPracticeMessageVisible] = useState(false);
   const gameId = 6;
 
@@ -121,7 +122,7 @@ const Compiler = () => {
           userId: userId,
           dateTime: new Date(),
           timeTaken: timeTaken,
-          languageUsed: language, 
+          languageUsed: language,
         });
       } else {
         querySnapshot.forEach(async (doc) => {
@@ -196,12 +197,18 @@ const Compiler = () => {
             {`Question: ${questions[currentQuestionIndex]?.question_text}`}
           </Text>
         ) : (
-          <Text color="yellow.300" fontSize="3xl" mb={2} fontFamily="Orbitron" textAlign="center" fontWeight="bold">
-          **Practice Mode Activated!** 
-          <br />
-          Write, run, and perfect your code right here!
-        </Text>
-        
+          <Text
+            className="practice-message"
+            color="yellow.300"
+            fontSize="1.8xl"
+            mb={2}
+            textAlign="center"
+            fontWeight="normal"
+          >
+            **Practice Mode Activated!**
+            <br />
+            Write, run, and perfect your code right here!
+          </Text>
         )}
 
         <Text color="green.400" fontSize="lg" mb={4} fontFamily="Orbitron">
