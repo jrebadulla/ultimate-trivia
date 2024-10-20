@@ -16,7 +16,7 @@ const BubblePopQuiz = React.memo(() => {
   const [error, setError] = useState("");
   const [popBubbleId, setPopBubbleId] = useState(null);
   const gameId = 1;
-  const gameName = "Bubble Script Challenge";
+  const gameName = "Bubble Pop";
 
   const currentQuestion = useMemo(
     () => questions[currentQuestionIndex],
