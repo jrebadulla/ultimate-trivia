@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./Dashboard.css";
+import { getAuth, signOut } from "firebase/auth";
 import Logo from "../Image/trivia-logo.png";
 import Tutorials from "../Tutotial/Tutorial";
 import QuizDashboard from "../QuizGames/QuizDashboard/QuizDashboard";
@@ -19,7 +20,9 @@ const DashboardLayout = () => {
   const [isLevelDropdownVisible, setLevelDropdownVisible] = useState(false);
   const [userRole, setUserRole] = useState("");
   const dropdownRef = useRef(null);
-  const [selectedYear, setSelectedYear] = useState(localStorage.getItem('selectedYear') || 'Year Level');
+  const [selectedYear, setSelectedYear] = useState(
+    localStorage.getItem("selectedYear") || "Year Level"
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,7 +35,7 @@ const DashboardLayout = () => {
 
     const storedActiveComponent = localStorage.getItem("activeComponent");
     if (storedActiveComponent) {
-        setActiveComponent(storedActiveComponent);
+      setActiveComponent(storedActiveComponent);
     }
 
     console.log(userRole);
@@ -63,15 +66,24 @@ const DashboardLayout = () => {
   };
 
   const handleSignInOut = () => {
-    localStorage.clear();
-    navigate("/signOut");
-    setIsDropdownVisible(false);
+    const auth = getAuth();
+
+    signOut(auth)
+      .then(() => {
+        localStorage.clear();
+
+        navigate("/signOut");
+
+        setIsDropdownVisible(false);
+      })
+      .catch((error) => {
+      });
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownVisible(false); 
+        setIsDropdownVisible(false);
         setLevelDropdownVisible(false);
       }
     };
@@ -82,7 +94,7 @@ const DashboardLayout = () => {
   }, []);
 
   const handleDropdownToggle = () => {
-    setIsDropdownVisible((prev) => !prev); 
+    setIsDropdownVisible((prev) => !prev);
   };
 
   const handleYearLevelClick = (event) => {
@@ -91,26 +103,26 @@ const DashboardLayout = () => {
   };
 
   const handleYearClick = (yearLevel) => {
-    let yearLabel = '';
+    let yearLabel = "";
     switch (yearLevel) {
       case 1:
-        yearLabel = 'First Year';
+        yearLabel = "First Year";
         break;
       case 2:
-        yearLabel = 'Second Year';
+        yearLabel = "Second Year";
         break;
       case 3:
-        yearLabel = 'Third Year';
+        yearLabel = "Third Year";
         break;
       case 4:
-        yearLabel = 'Fourth Year';
+        yearLabel = "Fourth Year";
         break;
       default:
-        yearLabel = 'Year Level';
-        localStorage.setItem('selectedYear', yearLabel);
+        yearLabel = "Year Level";
+        localStorage.setItem("selectedYear", yearLabel);
     }
     setSelectedYear(yearLabel);
-    localStorage.setItem('selectedYear', yearLabel); 
+    localStorage.setItem("selectedYear", yearLabel);
     localStorage.setItem("level_id", yearLevel);
     localStorage.setItem("activeComponent", activeComponent);
     setLevelDropdownVisible(false);
@@ -142,11 +154,11 @@ const DashboardLayout = () => {
             Statistics
           </a>
           <div>
-          <a href="#!" onClick={handleYearLevelClick}>
-        {selectedYear}
-      </a>
+            <a href="#!" onClick={handleYearLevelClick}>
+              {selectedYear}
+            </a>
             {isLevelDropdownVisible && (
-              <div  ref={dropdownRef} className="dropdown">
+              <div ref={dropdownRef} className="dropdown">
                 <ul>
                   <li>
                     <a href="#!" onClick={() => handleYearClick(1)}>
@@ -222,7 +234,7 @@ const DashboardLayout = () => {
                 cursor: "pointer",
                 zIndex: 1,
                 width: "80px",
-                fontSize: "12px"
+                fontSize: "12px",
               }}
             >
               <div onClick={handleSignInOut}>Sign Out</div>
@@ -230,15 +242,17 @@ const DashboardLayout = () => {
           )}
         </div>
       </div>
-      <ActiveComponentContext.Provider value={{ activeComponent, setActiveComponent }}>
-      <div className="content">
-        {activeComponent === "tutorial" && <Tutorials />}
-        {activeComponent === "quiz" && <QuizDashboard />}
-        {activeComponent === "compiler" && <Compiler />}
-        {activeComponent === "trivia" && <Trivia />}
-        {activeComponent === "statistics" && <UserStatistics />}
-        {activeComponent === "manage" && <Manage userRole={userRole} />}
-      </div>
+      <ActiveComponentContext.Provider
+        value={{ activeComponent, setActiveComponent }}
+      >
+        <div className="content">
+          {activeComponent === "tutorial" && <Tutorials />}
+          {activeComponent === "quiz" && <QuizDashboard />}
+          {activeComponent === "compiler" && <Compiler />}
+          {activeComponent === "trivia" && <Trivia />}
+          {activeComponent === "statistics" && <UserStatistics />}
+          {activeComponent === "manage" && <Manage userRole={userRole} />}
+        </div>
       </ActiveComponentContext.Provider>
     </div>
   );
