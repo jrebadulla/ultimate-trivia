@@ -70,8 +70,8 @@ const Manage = () => {
   const [tutorialList, setTutorialList] = useState([]);
   const [editingTutorialId, setEditingTutorialId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
   const [currentPage, setCurrentPage] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const itemsPerPage = 10;
 
   const filteredQuestions = questionList.filter((question) => {
@@ -248,6 +248,7 @@ const Manage = () => {
           createdAt: new Date(),
         });
         message.success("Trivia added successfully!");
+        setShowModal(false);
       }
 
       resetForm();
@@ -257,6 +258,7 @@ const Manage = () => {
       message.error(`Error adding/updating trivia: ${error.message}`);
     } finally {
       setLoading(false);
+      setShowModal(false);
     }
   };
 
@@ -273,9 +275,15 @@ const Manage = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this trivia?")) {
-      await deleteDoc(doc(db, "trivia", id));
-      message.success("Trivia deleted successfully!");
-      fetchTrivia();
+      try {
+        await deleteDoc(doc(db, "trivia", id));
+        message.success("Trivia deleted successfully!");
+        fetchTrivia();
+      } catch (error) {
+        console.error("Error deleting trivia:", error);
+        message.error("Failed to delete trivia.");
+      } finally {
+      }
     }
   };
 
@@ -315,7 +323,7 @@ const Manage = () => {
 
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
       const uploadedImageURLs = {};
       const imageFields = ["image1", "image2", "image3", "image4"];
@@ -356,8 +364,9 @@ const Manage = () => {
 
         setQuestionData((prev) => ({ ...prev, id: docRef.id }));
       }
-
+      setLoading(false);
       setShowQuestionModal(false);
+
       fetchQuestions();
 
       setQuestionData({
@@ -375,9 +384,11 @@ const Manage = () => {
         image3: null,
         image4: null,
       });
+      window.location.reload();
     } catch (error) {
       console.error("Error:", error.message);
       message.error(`Error adding/updating question: ${error.message}`);
+      setLoading(false);
     }
   };
 
@@ -465,14 +476,14 @@ const Manage = () => {
           videoData
         );
         message.success("Tutorial updated successfully!");
-        setEditingTutorialId(null); // Reset edit mode
+        setEditingTutorialId(null);
       } else {
         await setDoc(doc(db, "tutorial-videos", file.name), videoData);
         message.success("Video uploaded successfully!");
       }
 
-      fetchTutorials(); // Refresh tutorial list
-      setShowTutorialModal(false); // Close modal
+      fetchTutorials();
+      setShowTutorialModal(false);
     } catch (error) {
       console.error("Error saving video metadata:", error);
       message.error(`Error: ${error.message}`);
@@ -525,7 +536,7 @@ const Manage = () => {
           className="add-video"
           onClick={() => setShowTutorialModal(true)}
         >
-          Add New Toturial
+          Add New Tutorial
         </button>
       </div>
       <div className="manage-main-content">
@@ -616,14 +627,22 @@ const Manage = () => {
                 onSubmit={handleQuestionSubmit}
               >
                 <label htmlFor="game_id">Game ID:</label>
-                <input
-                  type="text"
+                <select
+                  className="select-level"
                   name="game_id"
                   value={questionData.game_id}
                   onChange={handleQuestionInputChange}
                   required
                   id="game_id"
-                />
+                >
+                  <option value="">Select a Game</option>
+                  <option value="1">Bubble Pop</option>
+                  <option value="3">Fill in the Blank</option>
+                  <option value="5">Four Pic One Word</option>
+                  <option value="2">Multiple Choice</option>
+                  <option value="4">Typing Game</option>
+                  <option value="6">Compiler</option>
+                </select>
                 <label htmlFor="question_text">
                   {" "}
                   Enter your question (max 130 characters):
@@ -637,14 +656,21 @@ const Manage = () => {
                   maxLength={130}
                 />
                 <label htmlFor="level_id">Required Student Level:</label>
-                <input
-                  type="text"
+                <select
+                  className="select-level"
                   name="level_id"
                   value={questionData.level_id}
                   onChange={handleQuestionInputChange}
                   required
                   id="level_id"
-                />
+                >
+                  <option value="">Select Level</option>
+                  <option value="1">First Year</option>
+                  <option value="2">Second Year</option>
+                  <option value="3">Third Year</option>
+                  <option value="4">Fourth Year</option>
+                </select>
+
                 <label htmlFor="option_a">
                   {" "}
                   Enter Option A (for Multiple Choice):
@@ -769,8 +795,16 @@ const Manage = () => {
                 )}
 
                 <div className="form-actions">
-                  <button type="submit" className="submit-btn">
-                    {questionData.id ? "Update Question" : "Add Question"}
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? "Processing..."
+                      : questionData.id
+                      ? "Update Question"
+                      : "Add Question"}
                   </button>
                   <button
                     type="button"

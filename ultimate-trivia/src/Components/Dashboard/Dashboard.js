@@ -10,6 +10,7 @@ import Trivia from "../Trivia/Trivia";
 import Manage from "../AdminManagement/AdminManagement";
 import UserStatistics from "../Statistics/Statistics";
 import ActiveComponentContext from "./ActiveComponentContext";
+import UserProfile from "./UserProfile";
 
 const DashboardLayout = () => {
   const [firstname, setFirstname] = useState("");
@@ -40,6 +41,10 @@ const DashboardLayout = () => {
 
     console.log(userRole);
   }, []);
+
+  const handleAccountClick = () => {
+    setActiveComponent("userProfile");
+  };
 
   const handleTutorialClick = () => {
     setActiveComponent("tutorial");
@@ -76,8 +81,7 @@ const DashboardLayout = () => {
 
         setIsDropdownVisible(false);
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
 
   useEffect(() => {
@@ -237,7 +241,8 @@ const DashboardLayout = () => {
                 fontSize: "12px",
               }}
             >
-              <div onClick={handleSignInOut}>Sign Out</div>
+              <button className="user-account" onClick={handleAccountClick}>Account</button>
+              <button className="sign-out-btn" onClick={handleSignInOut}>Sign Out</button>
             </div>
           )}
         </div>
@@ -252,6 +257,7 @@ const DashboardLayout = () => {
           {activeComponent === "trivia" && <Trivia />}
           {activeComponent === "statistics" && <UserStatistics />}
           {activeComponent === "manage" && <Manage userRole={userRole} />}
+          {activeComponent === "userProfile" && <UserProfile />} 
         </div>
       </ActiveComponentContext.Provider>
     </div>
