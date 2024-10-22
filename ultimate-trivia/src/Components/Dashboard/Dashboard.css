@@ -217,6 +217,8 @@ p {
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); 
   transform: translateY(0); 
   border: 1px solid rgba(0, 0, 0, 0.1); 
+  display: block;
+
 }
 
 .sign-in-out:hover {
@@ -272,6 +274,27 @@ p {
 .dropdown a:hover{
   font-size: 14px;
   font-weight: normal;
+}
+
+.user-account{
+  border: none;
+  border-radius: 10px;
+  padding: 2px;
+  font-size: 12px;
+  background-color: #fff;
+}
+
+.sign-out-btn{
+  border: none;
+  border-radius: 10px;
+  padding: 2px;
+  font-size: 12px;
+  margin-top: 10px;
+  background-color: #fff;
+}
+
+.user-account:hover{
+  background-color: none;
 }
 
 

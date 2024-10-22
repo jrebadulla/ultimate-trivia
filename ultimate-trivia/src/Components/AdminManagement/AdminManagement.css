@@ -486,7 +486,6 @@
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
   width: fit-content;
-  
 }
 
 .upload-label:hover {
@@ -495,3 +494,7 @@
   border: none;
 }
 
+.select-level {
+  height: 40px;
+  border-radius: 7px;
+}
