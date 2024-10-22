@@ -22,17 +22,19 @@ const TypingGame = () => {
   const [userScore, setUserScore] = useState(0);
   const [timer, setTimer] = useState(60);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [gameStatus, setGameStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const [pasteAttempted, setPasteAttempted] = useState(false);
+  const [errorIndices, setErrorIndices] = useState([]);
   const gameId = 4;
   const gameName = "Typing";
+
+  const errorSound = new Audio("/sounds/wrong.mp3");
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const levelId = localStorage.getItem("level_id");
 
       if (!levelId) {
-        setGameStatus("Level not found.");
         setLoading(false);
         return;
       }
@@ -66,9 +68,11 @@ const TypingGame = () => {
       }, 1000);
     } else if (timer === 0) {
       setGameFinished(true);
+      const totalTimeSpent = 60;
+      setTimeTaken(totalTimeSpent);
       const finalScore = calculateScore();
       setUserScore(finalScore);
-      saveUserScore(finalScore, 60 - timer);
+      saveUserScore(finalScore, totalTimeSpent);
     }
 
     return () => clearInterval(interval);
@@ -81,41 +85,74 @@ const TypingGame = () => {
       setStartTime(Date.now());
     }
 
-    // Calculate accuracy based on correct characters typed
+    const lastCharIndex = value.length - 1;
+
+    // Check if the last character is correct
+    const isCorrect = value[lastCharIndex] === snippet[lastCharIndex];
+
+    // If the character is incorrect, play the error sound and do not update userInput
+    if (!isCorrect) {
+      errorSound.play(); // Play sound on wrong input
+      setErrorIndices((prev) => [...prev, lastCharIndex]); // Store index of wrong input
+      return; // Prevent further processing
+    } else {
+      setErrorIndices((prev) =>
+        prev.filter((index) => index !== lastCharIndex)
+      ); // Remove index if corrected
+    }
+
+    // Update userInput only if the last character is correct
+    setUserInput(value);
+
     const matchingChars = value
       .split("")
       .filter((char, i) => char === snippet[i]).length;
     const calculatedAccuracy = (matchingChars / snippet.length) * 100;
     setAccuracy(calculatedAccuracy);
-    setUserInput(value);
 
+    // Prevent proceeding if the letter is incorrect
     if (value === snippet && !gameFinished) {
       const endTimeValue = Date.now();
       const timeSpent = (endTimeValue - startTime) / 1000;
 
       setEndTime(endTimeValue);
       setTimeTaken(timeSpent);
-
-      // Set score based on calculated accuracy
       const calculatedScore = Math.round(calculatedAccuracy);
       setUserScore(calculatedScore);
 
-      // Save the score and time taken
       saveUserScore(calculatedScore, timeSpent);
+      setGameFinished(true);
+    }
+  };
 
-      // Proceed to the next question or finish the game
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-        setSnippet(questions[currentQuestionIndex + 1].question_text);
-        setUserInput("");
-      } else {
-        setGameFinished(true);
-      }
+  const handlePaste = (e) => {
+    e.preventDefault();
+    setPasteAttempted(true);
+    setTimeout(() => {
+      setPasteAttempted(false);
+    }, 2000);
+  };
+
+  const goToNextLevel = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setSnippet(questions[currentQuestionIndex + 1].question_text);
+      setUserInput("");
+      setErrorIndices([]);
+      setGameFinished(false);
+      setAccuracy(null);
+      setTimeTaken(null);
+      setStartTime(null);
+      setTimer(60);
+    } else {
+      alert("You've completed all levels!");
+      resetGame();
     }
   };
 
   const resetGame = () => {
     setUserInput("");
+    setErrorIndices([]);
     setTimeTaken(null);
     setAccuracy(null);
     setStartTime(null);
@@ -208,27 +245,49 @@ const TypingGame = () => {
         {!gameFinished ? (
           <>
             <h2>Type the Code Snippet Below</h2>
-            <pre>{snippet}</pre>
+            <pre>
+              {snippet.split("").map((char, index) => (
+                <span
+                  key={index}
+                  className={errorIndices.includes(index) ? "error" : ""}
+                >
+                  {char}
+                </span>
+              ))}
+            </pre>
             <input
               type="text"
               value={userInput}
               onChange={handleInputChange}
+              onPaste={handlePaste}
               placeholder="Start typing..."
               className="input-field"
             />
+            {pasteAttempted && (
+              <div className="paste-message">Copy-pasting is not allowed!</div>
+            )}
             <div className="timer-typing">Time Left: {timer} seconds</div>
           </>
         ) : (
           <div className="FourPic-game-over">
-            <h2>Game Over!</h2>
+            <h2>Great Job!</h2>
             <p>
-              Your final score is:{" "}
-              <span className="FourPic-score">
-                {userScore}
-              </span>
+              <strong>You earned</strong> {accuracy ? accuracy.toFixed(2) : 0}%
+              for accuracy!
+              <br />
+              <strong>Time Taken:</strong>{" "}
+              {timeTaken ? timeTaken.toFixed(2) : 0} seconds
+              <br />
+              <strong>Your Score:</strong> {userScore}
             </p>
             <button onClick={resetGame} className="FourPic-play-again-button">
-              Play Again
+              Restart
+            </button>
+            <button
+              onClick={goToNextLevel}
+              className="FourPic-play-again-button reset"
+            >
+              Next Level
             </button>
           </div>
         )}

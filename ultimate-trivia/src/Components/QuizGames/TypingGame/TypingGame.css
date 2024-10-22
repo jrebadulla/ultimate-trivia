@@ -99,16 +99,8 @@
   color: #fff;
 }
 
-.game-over-buttons button {
-  background: linear-gradient(145deg, #ff7e5f, #feb47b);
-  box-shadow: 0px 5px 15px rgba(255, 126, 95, 0.6);
-  transition: transform 0.2s ease, background-color 0.3s ease;
-  border-radius: 10px;
-}
-
-.game-over-buttons button:active {
-  transform: scale(0.95);
-  box-shadow: 0px 2px 5px rgba(255, 126, 95, 0.4);
+.FourPic-game-over .reset {
+  margin-left: 20px;
 }
 
 @keyframes fadeIn {
@@ -120,4 +112,10 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  text-decoration: underline;
 }
