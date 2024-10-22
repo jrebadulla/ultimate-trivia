@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   collection,
   getDocs,
@@ -21,6 +21,8 @@ const FourPicsOneWord = () => {
   const [gameFinished, setGameFinished] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const inputRefs = useRef([]);
 
   const userId = localStorage.getItem("user_id");
   const gameId = 5;
@@ -77,6 +79,9 @@ const FourPicsOneWord = () => {
     const newAnswer = userAnswer.split("");
     newAnswer[index] = value.slice(-1);
     setUserAnswer(newAnswer.join(""));
+    if (value && inputRefs.current[index + 1]) {
+      inputRefs.current[index + 1].focus();
+    }
   };
 
   const handleSubmitAnswer = async () => {
@@ -201,10 +206,12 @@ const FourPicsOneWord = () => {
     <div>
       {gameFinished ? (
         <div className="FourPic-game-over">
-          <h2>Game Over!</h2>
+          <h2>Congratulations!</h2>
           <p>
-            Your final score is: <span className="FourPic-score">{score}</span>
+            You've completed this chapter. Stay tuned for more challenges coming
+            soon!
           </p>
+
           <button
             onClick={handlePlayAgain}
             className="FourPic-play-again-button"
@@ -258,6 +265,7 @@ const FourPicsOneWord = () => {
                 maxLength="1"
                 value={userAnswer[index] || ""}
                 onChange={(e) => handleLetterChange(index, e.target.value)}
+                ref={(el) => (inputRefs.current[index] = el)}
                 className={`FourPic-answer-box ${inputClass}`}
               />
             ))}

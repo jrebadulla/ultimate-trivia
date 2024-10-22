@@ -194,7 +194,7 @@ const FillInTheBlank = () => {
     <div>
       {quizFinished ? (
         <div className="FourPic-game-over">
-          <h2>Game Over!</h2>
+          <h2>Great Job! You Did It!</h2>
           <p>
             Your final score is:{" "}
             <span className="FourPic-score">
