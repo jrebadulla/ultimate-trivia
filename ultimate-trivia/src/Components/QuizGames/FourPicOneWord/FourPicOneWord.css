@@ -57,7 +57,7 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.FourPic-submit-button {
+.FourPic-submit-button, .FourPic-hint-button{
   padding: 12px 24px;
   font-size: 18px;
   margin: 10px;

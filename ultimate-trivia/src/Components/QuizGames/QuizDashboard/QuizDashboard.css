@@ -204,14 +204,3 @@
   background-color: #e63946;
   transform: scale(1.1);
 }
-
-.info-message {
-  font-size: 15px;
-  font-weight: bold;
-  color: #ffffff;
-  background-color: #00b4d8;
-  padding: 10px 20px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}

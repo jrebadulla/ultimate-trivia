@@ -316,6 +316,25 @@ const Manage = () => {
     }
   };
 
+  const resetQuestionForm = () => {
+    setQuestionData({
+      question_id: "",
+      game_id: "",
+      question_text: "",
+      level_id: "",
+      option_a: "",
+      option_b: "",
+      option_c: "",
+      option_d: "",
+      correct_answer: "",
+      image1: null,
+      image2: null,
+      image3: null,
+      image4: null,
+    });
+    setImagePreviews({});
+  };
+
   const handleQuestionInputChange = (e) => {
     const { name, value } = e.target;
     setQuestionData({ ...questionData, [name]: value });
@@ -327,9 +346,10 @@ const Manage = () => {
     try {
       const uploadedImageURLs = {};
       const imageFields = ["image1", "image2", "image3", "image4"];
+
       for (const imageField of imageFields) {
         const file = questionData[imageField];
-        if (file) {
+        if (file instanceof File) {
           const storageRef = ref(
             storage,
             `four-pic-one-word-images/${imageField}_${file.name}`
@@ -337,6 +357,8 @@ const Manage = () => {
           const snapshot = await uploadBytes(storageRef, file);
           const downloadURL = await getDownloadURL(snapshot.ref);
           uploadedImageURLs[imageField] = downloadURL;
+        } else {
+          uploadedImageURLs[imageField] = questionData[imageField];
         }
       }
 
@@ -364,6 +386,7 @@ const Manage = () => {
 
         setQuestionData((prev) => ({ ...prev, id: docRef.id }));
       }
+      resetQuestionForm();
       setLoading(false);
       setShowQuestionModal(false);
 
@@ -384,7 +407,6 @@ const Manage = () => {
         image3: null,
         image4: null,
       });
-      window.location.reload();
     } catch (error) {
       console.error("Error:", error.message);
       message.error(`Error adding/updating question: ${error.message}`);
@@ -404,10 +426,10 @@ const Manage = () => {
       option_c: question.option_c,
       option_d: question.option_d,
       correct_answer: question.correct_answer,
-      image1: null,
-      image2: null,
-      image3: null,
-      image4: null,
+      image1: question.image1,
+      image2: question.image2,
+      image3: question.image3,
+      image4: question.image4,
     });
     setImagePreviews({
       image1: question.image1,
@@ -528,7 +550,10 @@ const Manage = () => {
 
         <button
           className="add-question"
-          onClick={() => setShowQuestionModal(true)}
+          onClick={() => {
+            resetQuestionForm();
+            setShowQuestionModal(true);
+          }}
         >
           Add question
         </button>

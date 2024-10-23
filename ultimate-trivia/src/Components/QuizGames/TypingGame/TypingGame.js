@@ -270,15 +270,41 @@ const TypingGame = () => {
           </>
         ) : (
           <div className="FourPic-game-over">
-            <h2>Great Job!</h2>
+            {accuracy >= 80 ? (
+              <h2>Excellent Job!</h2>
+            ) : accuracy >= 50 ? (
+              <h2>Great Job!</h2>
+            ) : (
+              <h2>Don't Give Up, Keep Practicing!</h2>
+            )}
             <p>
-              <strong>You earned</strong> {accuracy ? accuracy.toFixed(2) : 0}%
-              for accuracy!
-              <br />
-              <strong>Time Taken:</strong>{" "}
-              {timeTaken ? timeTaken.toFixed(2) : 0} seconds
-              <br />
-              <strong>Your Score:</strong> {userScore}
+              {accuracy !== null && accuracy >= 80 ? (
+                <>
+                  <strong>You're a typing master!</strong> You earned{" "}
+                  {accuracy ? accuracy.toFixed(2) : "0"}% for accuracy.
+                  <br />
+                  <strong>Time Taken:</strong>{" "}
+                  {timeTaken ? timeTaken.toFixed(2) : "0"} seconds. Keep up the
+                  amazing work!
+                </>
+              ) : accuracy !== null && accuracy >= 50 ? (
+                <>
+                  <strong>Great effort!</strong> You scored{" "}
+                  {accuracy ? accuracy.toFixed(2) : "0"}% for accuracy.
+                  <br />
+                  <strong>Time Taken:</strong>{" "}
+                  {timeTaken ? timeTaken.toFixed(2) : "0"} seconds. You're
+                  improving.
+                </>
+              ) : (
+                <>
+                  <strong>Keep Practicing!</strong> You earned{" "}
+                  {accuracy ? accuracy.toFixed(2) : "0"}% for accuracy.
+                  <br />
+                  <strong>Time Taken:</strong>{" "}
+                  {timeTaken ? timeTaken.toFixed(2) : "0"} seconds.
+                </>
+              )}
             </p>
             <button onClick={resetGame} className="FourPic-play-again-button">
               Restart
