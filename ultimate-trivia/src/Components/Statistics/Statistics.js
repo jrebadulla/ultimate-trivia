@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Radar, Line } from "react-chartjs-2";
 import "./Statistics.css";
-import noFound from './no_data_icon.png';
+import noFound from "./no_data_icon.png";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -92,10 +92,14 @@ const UserStatistics = () => {
       return;
     }
 
-    const labels = data.map((item) => `${item.game_name}`);
-    const correctAnswers = data.map((item) => item.correctAnswers);
-    const incorrectAnswers = data.map((item) => item.incorrectAnswers);
-    const times = data.map((item) => (item.timeTaken / 60).toFixed(2)); // Time taken in minutes
+    // Filter out the "Typing" game data
+    const filteredData = data.filter((item) => item.game_name !== "Typing");
+
+    // Map through the filtered data for labels and datasets
+    const labels = filteredData.map((item) => `${item.game_name}`);
+    const correctAnswers = filteredData.map((item) => item.correctAnswers);
+    const incorrectAnswers = filteredData.map((item) => item.incorrectAnswers);
+    const times = filteredData.map((item) => (item.timeTaken / 60).toFixed(2));
 
     setChartData({
       labels,
@@ -117,7 +121,6 @@ const UserStatistics = () => {
       ],
     });
 
-    // Set time taken data for a new line chart
     setTimeTakenData({
       labels,
       datasets: [
@@ -135,7 +138,7 @@ const UserStatistics = () => {
     });
 
     setSuggestions(
-      data.map((item) => {
+      filteredData.map((item) => {
         const correctRate = (item.correctAnswers / item.totalQuestions) * 100;
         return correctRate >= 80
           ? {

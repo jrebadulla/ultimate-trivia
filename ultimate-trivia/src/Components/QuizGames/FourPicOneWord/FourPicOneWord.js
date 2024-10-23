@@ -21,6 +21,9 @@ const FourPicsOneWord = () => {
   const [gameFinished, setGameFinished] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [timerActive, setTimerActive] = useState(true);
+  const [hintsLeft, setHintsLeft] = useState(3); // Hints
 
   const inputRefs = useRef([]);
 
@@ -71,8 +74,41 @@ const FourPicsOneWord = () => {
     startGame();
   }, [gameId]);
 
+  useEffect(() => {
+    let timer;
+    if (timerActive && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    } else if (timeLeft === 0) {
+      handleTimeUp();
+    }
+    return () => clearTimeout(timer);
+  }, [timeLeft, timerActive]);
+
   const startGame = () => {
     setStartTime(Date.now());
+    setTimeLeft(30); // Reset timer to 30 seconds when game starts
+  };
+
+  const handleTimeUp = () => {
+    setTimerActive(false);
+    setInputClass("incorrect");
+    incorrectSound.play();
+    setShowScore(true);
+
+    setTimeout(() => {
+      if (currentQuestionIndex + 1 < questions.length) {
+        const nextQuestion = questions[currentQuestionIndex + 1];
+        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        setCorrectAnswer(nextQuestion?.correct_answer || "");
+        setUserAnswer("");
+        setTimeLeft(30); // Reset timer to 30 seconds for the next question
+        setTimerActive(true);
+        setShowScore(false);
+      } else {
+        setGameFinished(true);
+        finishGame(score);
+      }
+    }, 1000);
   };
 
   const handleLetterChange = (index, value) => {
@@ -104,6 +140,7 @@ const FourPicsOneWord = () => {
           setCorrectAnswer(nextQuestion?.correct_answer || "");
           setUserAnswer("");
           setShowScore(false);
+          setTimeLeft(30); // Reset timer to 30 seconds for the next question
         } else {
           setInputClass("");
           setGameFinished(true);
@@ -178,12 +215,27 @@ const FourPicsOneWord = () => {
     }
   };
 
+  const useHint = () => {
+    if (hintsLeft > 0 && correctAnswer.length > userAnswer.length) {
+      const newAnswer = userAnswer.split("");
+      for (let i = 0; i < correctAnswer.length; i++) {
+        if (!newAnswer[i]) {
+          newAnswer[i] = correctAnswer[i];
+          break;
+        }
+      }
+      setUserAnswer(newAnswer.join(""));
+      setHintsLeft(hintsLeft - 1);
+    }
+  };
+
   const handlePlayAgain = () => {
     setCurrentQuestionIndex(0);
     setUserAnswer("");
     setScore(0);
     setGameFinished(false);
     setStartTime(Date.now());
+    setTimeLeft(30); // Reset timer to 30 seconds when the game restarts
   };
 
   if (loading) {
@@ -211,7 +263,6 @@ const FourPicsOneWord = () => {
             You've completed this chapter. Stay tuned for more challenges coming
             soon!
           </p>
-
           <button
             onClick={handlePlayAgain}
             className="FourPic-play-again-button"
@@ -221,9 +272,13 @@ const FourPicsOneWord = () => {
         </div>
       ) : (
         <>
+          <div className="FourPic-scoreboard">
+        
+          </div>
           <div>
             <p className="level">Level {currentQuestionIndex + 1}</p>
           </div>
+          <div className="FourPic-timer">Time left: {timeLeft}s</div>
           <h2 className="FourPic-question-text">
             {currentQuestion.question_text}
           </h2>
@@ -276,6 +331,13 @@ const FourPicsOneWord = () => {
             disabled={userAnswer.length < correctAnswer.length}
           >
             Submit
+          </button>
+          <button
+            className="FourPic-hint-button"
+            onClick={useHint}
+            disabled={hintsLeft === 0}
+          >
+            Use Hint ({hintsLeft} left)
           </button>
         </>
       )}
